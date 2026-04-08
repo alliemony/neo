@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: var(--color-bg, #FAFAF8);
+  --color-surface: var(--color-surface, #FFFFFF);
+  --color-border: var(--color-border, #2D2D2D);
+  --color-text-primary: var(--color-text-primary, #1A1A1A);
+  --color-text-secondary: var(--color-text-secondary, #6B6B6B);
+  --color-accent: var(--color-accent, #E85D3A);
+  --color-accent-alt: var(--color-accent-alt, #3A7CE8);
+  --color-tag-bg: var(--color-tag-bg, #F0EDE6);
+  --color-success: var(--color-success, #2D8A4E);
+  --color-code-bg: var(--color-code-bg, #F5F2EB);
+
+  --font-heading: var(--font-heading, "JetBrains Mono", monospace);
+  --font-body: var(--font-body, "Inter", system-ui, sans-serif);
+  --font-code: var(--font-code, "JetBrains Mono", monospace);
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  line-height: 1.7;
+  margin: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  line-height: 1.2;
+}
+
+code, pre {
+  font-family: var(--font-code);
+}
+
+*, *::before, *::after {
+  border-color: var(--color-border);
+}
