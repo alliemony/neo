@@ -1,20 +1,40 @@
-import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import App from './App';
 
+const mockFetch = vi.fn();
+
+beforeEach(() => {
+  vi.stubGlobal('fetch', mockFetch);
+  mockFetch.mockResolvedValue({
+    ok: true,
+    json: () => Promise.resolve({ posts: [], total: 0 }),
+  });
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
 describe('App', () => {
-  it('renders without crashing', () => {
+  it('renders without crashing', async () => {
     render(<App />);
-    expect(screen.getByText('neo', { selector: 'h1' })).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('neo', { selector: 'h1' })).toBeInTheDocument();
+    });
   });
 
-  it('shows the site tagline', () => {
+  it('shows the site tagline', async () => {
     render(<App />);
-    expect(screen.getByText('personal web garden')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('personal web garden')).toBeInTheDocument();
+    });
   });
 
-  it('includes header and footer', () => {
+  it('includes header and footer', async () => {
     render(<App />);
-    expect(screen.getByText(/built with care/)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/built with care/)).toBeInTheDocument();
+    });
   });
 });
