@@ -72,3 +72,42 @@ func (s *PostService) ListByTag(tag string, opts model.ListOptions) ([]model.Pos
 func (s *PostService) AllTags() ([]model.TagCount, error) {
 	return s.repo.AllTags()
 }
+
+// ListAll returns all posts including drafts (for admin).
+func (s *PostService) ListAll(opts model.ListOptions) ([]model.Post, int, error) {
+	return s.repo.List(opts, false)
+}
+
+// Update updates an existing post by slug.
+func (s *PostService) Update(slug string, input model.UpdatePostInput) (*model.Post, error) {
+	post, err := s.repo.GetBySlug(slug)
+	if err != nil {
+		return nil, err
+	}
+
+	if input.Title != nil {
+		post.Title = *input.Title
+	}
+	if input.Content != nil {
+		post.Content = *input.Content
+	}
+	if input.ContentType != nil {
+		post.ContentType = *input.ContentType
+	}
+	if input.Tags != nil {
+		post.Tags = input.Tags
+	}
+	if input.Published != nil {
+		post.Published = *input.Published
+	}
+
+	if err := s.repo.Update(post); err != nil {
+		return nil, err
+	}
+	return post, nil
+}
+
+// Delete removes a post by slug.
+func (s *PostService) Delete(slug string) error {
+	return s.repo.Delete(slug)
+}

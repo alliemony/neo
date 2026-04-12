@@ -28,9 +28,9 @@ func (r *PostRepo) Create(post *model.Post) error {
 
 	now := time.Now().UTC()
 	result, err := r.db.Exec(
-		`INSERT INTO posts (slug, title, content, content_type, tags, published, created_at, updated_at)
-		 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-		post.Slug, post.Title, post.Content, post.ContentType, string(tagsJSON), post.Published, now, now,
+		`INSERT INTO posts (slug, title, content, content_type, tags, published, like_count, created_at, updated_at)
+		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		post.Slug, post.Title, post.Content, post.ContentType, string(tagsJSON), post.Published, post.LikeCount, now, now,
 	)
 	if err != nil {
 		return fmt.Errorf("insert post: %w", err)
@@ -50,7 +50,7 @@ func (r *PostRepo) Create(post *model.Post) error {
 // GetBySlug returns a single post by its slug.
 func (r *PostRepo) GetBySlug(slug string) (*model.Post, error) {
 	row := r.db.QueryRow(
-		`SELECT id, slug, title, content, content_type, tags, published, created_at, updated_at
+		`SELECT id, slug, title, content, content_type, tags, published, like_count, created_at, updated_at
 		 FROM posts WHERE slug = ?`, slug,
 	)
 	return scanPost(row)
@@ -65,11 +65,11 @@ func (r *PostRepo) List(opts model.ListOptions, publishedOnly bool) ([]model.Pos
 
 	if publishedOnly {
 		countQuery = "SELECT COUNT(*) FROM posts WHERE published = 1"
-		listQuery = `SELECT id, slug, title, content, content_type, tags, published, created_at, updated_at
+		listQuery = `SELECT id, slug, title, content, content_type, tags, published, like_count, created_at, updated_at
 		             FROM posts WHERE published = 1 ORDER BY created_at DESC LIMIT ? OFFSET ?`
 	} else {
 		countQuery = "SELECT COUNT(*) FROM posts"
-		listQuery = `SELECT id, slug, title, content, content_type, tags, published, created_at, updated_at
+		listQuery = `SELECT id, slug, title, content, content_type, tags, published, like_count, created_at, updated_at
 		             FROM posts ORDER BY created_at DESC LIMIT ? OFFSET ?`
 	}
 
@@ -105,7 +105,7 @@ func (r *PostRepo) ListByTag(tag string, opts model.ListOptions) ([]model.Post, 
 
 	offset := (opts.Page - 1) * opts.PerPage
 	listQuery := `SELECT posts.id, posts.slug, posts.title, posts.content, posts.content_type,
-	              posts.tags, posts.published, posts.created_at, posts.updated_at
+	              posts.tags, posts.published, posts.like_count, posts.created_at, posts.updated_at
 	              FROM posts, json_each(posts.tags)
 	              WHERE json_each.value = ? AND posts.published = 1
 	              ORDER BY posts.created_at DESC LIMIT ? OFFSET ?`
@@ -177,13 +177,34 @@ func (r *PostRepo) Delete(slug string) error {
 	return nil
 }
 
+// IncrementLikeCount atomically increments a post's like_count and returns the new value.
+func (r *PostRepo) IncrementLikeCount(slug string) (int, error) {
+	result, err := r.db.Exec(
+		`UPDATE posts SET like_count = like_count + 1 WHERE slug = ?`, slug,
+	)
+	if err != nil {
+		return 0, fmt.Errorf("increment like count: %w", err)
+	}
+	n, _ := result.RowsAffected()
+	if n == 0 {
+		return 0, model.ErrNotFound
+	}
+
+	var count int
+	err = r.db.QueryRow(`SELECT like_count FROM posts WHERE slug = ?`, slug).Scan(&count)
+	if err != nil {
+		return 0, fmt.Errorf("read like count: %w", err)
+	}
+	return count, nil
+}
+
 // scanPost scans a single row into a Post.
 func scanPost(row *sql.Row) (*model.Post, error) {
 	var p model.Post
 	var tagsJSON string
 	var published int
 
-	err := row.Scan(&p.ID, &p.Slug, &p.Title, &p.Content, &p.ContentType, &tagsJSON, &published, &p.CreatedAt, &p.UpdatedAt)
+	err := row.Scan(&p.ID, &p.Slug, &p.Title, &p.Content, &p.ContentType, &tagsJSON, &published, &p.LikeCount, &p.CreatedAt, &p.UpdatedAt)
 	if err == sql.ErrNoRows {
 		return nil, model.ErrNotFound
 	}
@@ -205,7 +226,7 @@ func scanPosts(rows *sql.Rows, total int) ([]model.Post, int, error) {
 		var p model.Post
 		var tagsJSON string
 		var published int
-		if err := rows.Scan(&p.ID, &p.Slug, &p.Title, &p.Content, &p.ContentType, &tagsJSON, &published, &p.CreatedAt, &p.UpdatedAt); err != nil {
+		if err := rows.Scan(&p.ID, &p.Slug, &p.Title, &p.Content, &p.ContentType, &tagsJSON, &published, &p.LikeCount, &p.CreatedAt, &p.UpdatedAt); err != nil {
 			return nil, 0, fmt.Errorf("scan post row: %w", err)
 		}
 		p.Published = published != 0

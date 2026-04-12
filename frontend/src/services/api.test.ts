@@ -20,9 +20,7 @@ describe('getPosts', () => {
     });
 
     const result = await getPosts();
-    expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining('/api/v1/posts'),
-    );
+    expect(mockFetch.mock.calls[0]![0]).toContain('/api/v1/posts');
     expect(result).toEqual(data);
   });
 
@@ -68,9 +66,7 @@ describe('getPostBySlug', () => {
     });
 
     const result = await getPostBySlug('hello-world');
-    expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining('/api/v1/posts/hello-world'),
-    );
+    expect(mockFetch.mock.calls[0]![0]).toContain('/api/v1/posts/hello-world');
     expect(result).toEqual(post);
   });
 
@@ -94,9 +90,7 @@ describe('getTags', () => {
     });
 
     const result = await getTags();
-    expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining('/api/v1/tags'),
-    );
+    expect(mockFetch.mock.calls[0]![0]).toContain('/api/v1/tags');
     expect(result).toEqual(tags);
   });
 });

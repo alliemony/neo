@@ -14,6 +14,7 @@ type Post struct {
 	ContentType string    `json:"content_type"`
 	Tags        []string  `json:"tags"`
 	Published   bool      `json:"published"`
+	LikeCount   int       `json:"like_count"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }

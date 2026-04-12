@@ -1,17 +1,25 @@
-import { useParams, useSearchParams, Link } from 'react-router-dom';
-import { Layout } from '../components/layout/Layout';
-import { PostList } from '../components/blog/PostList';
-import { usePosts } from '../hooks/usePosts';
+import { useParams, useSearchParams, Link } from "react-router-dom";
+import { Layout } from "../components/layout/Layout";
+import { Sidebar } from "../components/layout/Sidebar";
+import { PostList } from "../components/blog/PostList";
+import { TagCloud } from "../components/blog/TagCloud";
+import { usePosts } from "../hooks/usePosts";
 
 export function TagFeed() {
   const { tag } = useParams<{ tag: string }>();
   const [searchParams] = useSearchParams();
-  const page = Number(searchParams.get('page')) || 1;
+  const page = Number(searchParams.get("page")) || 1;
 
   const { posts, total, loading, error } = usePosts({ tag, page });
 
+  const sidebar = (
+    <Sidebar>
+      <TagCloud />
+    </Sidebar>
+  );
+
   return (
-    <Layout>
+    <Layout sidebar={sidebar}>
       <div className="mb-8">
         <Link to="/" className="text-accent hover:underline text-sm">
           ← All posts

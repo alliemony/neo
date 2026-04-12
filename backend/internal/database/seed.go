@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// Seed inserts sample posts if the database is empty.
+// Seed inserts sample posts, pages, and comments if the database is empty.
 func Seed(db *sql.DB) error {
 	var count int
 	if err := db.QueryRow("SELECT COUNT(*) FROM posts").Scan(&count); err != nil {
@@ -20,6 +20,7 @@ func Seed(db *sql.DB) error {
 		slug        string
 		title       string
 		content     string
+		contentType string
 		tags        []string
 		published   bool
 		createdAt   time.Time
@@ -117,19 +118,162 @@ This keeps the main site fast while still offering interactive ML demos.`,
 			published: false,
 			createdAt: time.Now(),
 		},
+		{
+			slug:        "try-sentiment-analysis",
+			title:       "Try: Sentiment Analysis Widget",
+			content:     "sentiment",
+			contentType: "widget",
+			tags:        []string{"widgets", "ml", "interactive"},
+			published:   true,
+			createdAt:   time.Now().Add(-6 * time.Hour),
+		},
 	}
 
 	for _, s := range seeds {
 		tagsJSON, _ := json.Marshal(s.tags)
+		ct := s.contentType
+		if ct == "" {
+			ct = "markdown"
+		}
 		_, err := db.Exec(
 			`INSERT INTO posts (slug, title, content, content_type, tags, published, created_at, updated_at)
-			 VALUES (?, ?, ?, 'markdown', ?, ?, ?, ?)`,
-			s.slug, s.title, s.content, string(tagsJSON), s.published, s.createdAt, s.createdAt,
+			 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+			s.slug, s.title, s.content, ct, string(tagsJSON), s.published, s.createdAt, s.createdAt,
 		)
 		if err != nil {
 			return err
 		}
 	}
+
+	// Seed pages
+	pages := []struct {
+		slug      string
+		title     string
+		content   string
+		published bool
+		sortOrder int
+	}{
+		{
+			slug:  "about",
+			title: "About",
+			content: `# About Neo
+
+Neo is a personal web garden — a space for writing, experimentation, and creative projects.
+
+## Who am I?
+
+I'm a developer who loves building things on the web. This site is my little corner of the internet where I share thoughts about programming, design, and technology.
+
+## The stack
+
+- **Frontend**: React + TypeScript + Tailwind CSS
+- **Backend**: Go with Chi router
+- **Widgets**: Python FastAPI with HuggingFace models
+- **Database**: SQLite (dev) / PostgreSQL (prod)
+
+## Philosophy
+
+I believe in simple, functional design. No unnecessary complexity. Every line of code should earn its place.`,
+			published: true,
+			sortOrder: 1,
+		},
+		{
+			slug:  "projects",
+			title: "Projects",
+			content: `# Projects
+
+A collection of things I've built or am currently working on.
+
+## Neo (this site)
+A personal web garden with blog, notebooks, and ML widgets. Built with Go, React, and Python.
+
+## CLI Tools
+Various command-line utilities for productivity and automation.
+
+## Open Source Contributions
+Patches and features contributed to projects I use and care about.
+
+*More projects coming soon.*`,
+			published: true,
+			sortOrder: 2,
+		},
+		{
+			slug:  "contact",
+			title: "Contact",
+			content: `# Contact
+
+Want to get in touch? Here's how:
+
+- **Email**: hello@example.com
+- **GitHub**: github.com/example
+- **Twitter/X**: @example
+
+I'm always happy to chat about programming, design, or interesting projects. Feel free to reach out!`,
+			published: true,
+			sortOrder: 3,
+		},
+		{
+			slug:      "secret-draft",
+			title:     "Secret Draft Page",
+			content:   "This page is not published yet. Only admins can see it.",
+			published: false,
+			sortOrder: 99,
+		},
+	}
+
+	for _, p := range pages {
+		now := time.Now()
+		_, err := db.Exec(
+			`INSERT INTO pages (slug, title, content, published, sort_order, created_at, updated_at)
+			 VALUES (?, ?, ?, ?, ?, ?, ?)`,
+			p.slug, p.title, p.content, p.published, p.sortOrder, now, now,
+		)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Seed comments on posts
+	// Get post IDs first
+	var welcomeID, goReactID, retroID int64
+	db.QueryRow("SELECT id FROM posts WHERE slug = 'welcome-to-neo'").Scan(&welcomeID)
+	db.QueryRow("SELECT id FROM posts WHERE slug = 'building-with-go-and-react'").Scan(&goReactID)
+	db.QueryRow("SELECT id FROM posts WHERE slug = 'retro-web-design'").Scan(&retroID)
+
+	comments := []struct {
+		postID     int64
+		authorName string
+		content    string
+		createdAt  time.Time
+	}{
+		{welcomeID, "Alice", "Welcome to the internet! Love the retro vibes.", time.Now().Add(-60 * time.Hour)},
+		{welcomeID, "Bob", "Looking forward to more posts. The ML widgets sound really cool!", time.Now().Add(-55 * time.Hour)},
+		{welcomeID, "Charlie", "Clean design. Reminds me of the early web days. 👍", time.Now().Add(-50 * time.Hour)},
+		{goReactID, "Dave", "Great stack choice! Go + React is a solid combo.", time.Now().Add(-40 * time.Hour)},
+		{goReactID, "Eve", "How does the Chi router compare to Gin? Been thinking about switching.", time.Now().Add(-35 * time.Hour)},
+		{retroID, "Frank", "Total agree on monospace headings. JetBrains Mono is 🔥", time.Now().Add(-20 * time.Hour)},
+		{retroID, "Grace", "The border-radius: 0 approach is bold. I love it.", time.Now().Add(-15 * time.Hour)},
+	}
+
+	for _, c := range comments {
+		if c.postID == 0 {
+			continue
+		}
+		_, err := db.Exec(
+			`INSERT INTO comments (post_id, author_name, content, created_at)
+			 VALUES (?, ?, ?, ?)`,
+			c.postID, c.authorName, c.content, c.createdAt,
+		)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Set some like counts on posts
+	db.Exec("UPDATE posts SET like_count = 12 WHERE slug = 'welcome-to-neo'")
+	db.Exec("UPDATE posts SET like_count = 8 WHERE slug = 'building-with-go-and-react'")
+	db.Exec("UPDATE posts SET like_count = 15 WHERE slug = 'retro-web-design'")
+	db.Exec("UPDATE posts SET like_count = 5 WHERE slug = 'python-ml-widgets'")
 
 	return nil
 }

@@ -1,11 +1,16 @@
-import { useParams, Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import { Layout } from '../components/layout/Layout';
-import { MarkdownContent } from '../components/blog/MarkdownContent';
-import { TagPill } from '../components/blog/TagPill';
-import { formatRelativeTime } from '../utils/time';
-import { getPostBySlug } from '../services/api';
-import type { Post } from '../types/post';
+import { useParams, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Layout } from "../components/layout/Layout";
+import { Sidebar } from "../components/layout/Sidebar";
+import { MarkdownContent } from "../components/blog/MarkdownContent";
+import { WidgetEmbed } from "../components/blog/WidgetEmbed";
+import { TagPill } from "../components/blog/TagPill";
+import { LikeButton } from "../components/blog/LikeButton";
+import { CommentSection } from "../components/blog/CommentSection";
+import { SEO } from "../components/SEO";
+import { formatRelativeTime } from "../utils/time";
+import { getPostBySlug } from "../services/api";
+import type { Post } from "../types/post";
 
 export function PostView() {
   const { slug } = useParams<{ slug: string }>();
@@ -25,7 +30,7 @@ export function PostView() {
         setLoading(false);
       })
       .catch((err) => {
-        if (err.message.includes('404')) {
+        if (err.message.includes("404")) {
           setNotFound(true);
         }
         setLoading(false);
@@ -54,8 +59,19 @@ export function PostView() {
     );
   }
 
+  const sidebarContent = (
+    <Sidebar>
+      <CommentSection slug={post.slug} />
+    </Sidebar>
+  );
+
   return (
-    <Layout>
+    <Layout sidebar={sidebarContent}>
+      <SEO
+        title={post.title}
+        description={post.content.slice(0, 160)}
+        path={`/blog/${post.slug}`}
+      />
       <article>
         <header className="mb-8">
           <h1 className="font-heading text-3xl font-bold mb-2">{post.title}</h1>
@@ -72,7 +88,19 @@ export function PostView() {
             </time>
           </div>
         </header>
-        <MarkdownContent content={post.content} />
+        {post.content_type === "widget" ? (
+          <WidgetEmbed widgetId={post.content} />
+        ) : (
+          <MarkdownContent content={post.content} />
+        )}
+        <div className="mt-8 flex items-center gap-4">
+          <LikeButton slug={post.slug} initialCount={post.like_count} />
+        </div>
+
+        {/* Mobile: comments below content */}
+        <div className="mt-8 lg:hidden">
+          <CommentSection slug={post.slug} />
+        </div>
       </article>
     </Layout>
   );
