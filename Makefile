@@ -25,7 +25,7 @@ test-widgets: ## Run widget tests
 
 build: ## Build all for production
 	cd frontend && npm run build
-	cd backend && CGO_ENABLED=1 go build -o bin/server ./cmd/server
+	cd backend && CGO_ENABLED=0 go build -o bin/server ./cmd/server
 
 clean: ## Clean build artifacts
 	rm -rf frontend/dist backend/bin

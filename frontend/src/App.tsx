@@ -1,14 +1,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Layout } from './components/layout/Layout';
-
-function Home() {
-  return (
-    <Layout>
-      <h1 className="font-heading text-3xl font-bold mb-4">neo</h1>
-      <p className="text-text-secondary">personal web garden</p>
-    </Layout>
-  );
-}
+import { Home } from './routes/Home';
+import { PostView } from './routes/PostView';
+import { TagFeed } from './routes/TagFeed';
 
 function NotFound() {
   return (
@@ -26,6 +20,8 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/blog/:slug" element={<PostView />} />
+        <Route path="/tag/:tag" element={<TagFeed />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

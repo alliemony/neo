@@ -10,11 +10,27 @@ import (
 	"github.com/go-chi/cors"
 
 	"github.com/alliemony/neo/backend/internal/config"
+	"github.com/alliemony/neo/backend/internal/database"
 	"github.com/alliemony/neo/backend/internal/handler"
+	"github.com/alliemony/neo/backend/internal/repository"
+	"github.com/alliemony/neo/backend/internal/service"
 )
 
 func main() {
 	cfg := config.Load()
+
+	db, err := database.New(cfg.DatabaseURL)
+	if err != nil {
+		log.Fatalf("open database: %v", err)
+	}
+	defer db.Close()
+
+	postRepo := repository.NewPostRepo(db)
+	postService := service.NewPostService(postRepo)
+
+	if err := database.Seed(db); err != nil {
+		log.Printf("seed data: %v", err)
+	}
 
 	r := chi.NewRouter()
 
@@ -29,9 +45,13 @@ func main() {
 	}))
 
 	healthHandler := handler.NewHealthHandler()
+	postHandler := handler.NewPostHandler(postService)
 
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Get("/health", healthHandler.Health)
+		r.Get("/posts", postHandler.List)
+		r.Get("/posts/{slug}", postHandler.GetBySlug)
+		r.Get("/tags", postHandler.ListTags)
 	})
 
 	addr := fmt.Sprintf(":%s", cfg.Port)
