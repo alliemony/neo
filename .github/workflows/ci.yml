@@ -56,5 +56,5 @@ jobs:
         with:
           python-version: "3.11"
 
-      - run: pip install -e ".[dev]"
-      - run: pytest
+      - run: pip install -e ".[dev]" -q
+      - run: python3 -m pytest tests/
