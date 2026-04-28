@@ -157,6 +157,9 @@ var sqliteMigrations = map[string]string{
 		CREATE INDEX IF NOT EXISTS idx_pages_slug ON pages(slug);
 		CREATE INDEX IF NOT EXISTS idx_pages_published ON pages(published);
 	`,
+	"005_add_content_type_to_pages": `
+		ALTER TABLE pages ADD COLUMN content_type TEXT NOT NULL DEFAULT 'markdown';
+	`,
 }
 
 // postgresMigrations are PostgreSQL-specific DDL.
@@ -201,5 +204,8 @@ var postgresMigrations = map[string]string{
 		);
 		CREATE INDEX IF NOT EXISTS idx_pages_slug ON pages(slug);
 		CREATE INDEX IF NOT EXISTS idx_pages_published ON pages(published);
+	`,
+	"005_add_content_type_to_pages": `
+		ALTER TABLE pages ADD COLUMN content_type TEXT NOT NULL DEFAULT 'markdown';
 	`,
 }

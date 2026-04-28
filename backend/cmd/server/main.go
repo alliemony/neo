@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -35,6 +36,20 @@ func main() {
 		log.Printf("enable foreign keys: %v", err)
 	}
 
+	if err := database.Seed(db); err != nil {
+		log.Printf("seed data: %v", err)
+	}
+
+	r := newRouter(cfg, db)
+
+	addr := fmt.Sprintf(":%s", cfg.Port)
+	log.Printf("neo backend listening on %s", addr)
+	if err := http.ListenAndServe(addr, r); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func newRouter(cfg config.Config, db *sql.DB) http.Handler {
 	postRepo := repository.NewPostRepo(db)
 	commentRepo := repository.NewCommentRepo(db)
 	pageRepo := repository.NewPageRepo(db)
@@ -42,10 +57,6 @@ func main() {
 	postService := service.NewPostService(postRepo)
 	commentService := service.NewCommentService(commentRepo, postRepo)
 	pageService := service.NewPageService(pageRepo)
-
-	if err := database.Seed(db); err != nil {
-		log.Printf("seed data: %v", err)
-	}
 
 	r := chi.NewRouter()
 
@@ -61,7 +72,7 @@ func main() {
 
 	healthHandler := handler.NewHealthHandler()
 	postHandler := handler.NewPostHandler(postService)
-	commentHandler := handler.NewCommentHandler(commentService)
+	commentHandler := handler.NewCommentHandler(commentService, postRepo)
 	likeHandler := handler.NewLikeHandler(postRepo)
 	pageHandler := handler.NewPageHandler(pageService)
 	adminPostHandler := handler.NewAdminPostHandler(postService)
@@ -162,9 +173,5 @@ func main() {
 		})
 	}
 
-	addr := fmt.Sprintf(":%s", cfg.Port)
-	log.Printf("neo backend listening on %s", addr)
-	if err := http.ListenAndServe(addr, r); err != nil {
-		log.Fatal(err)
-	}
+	return r
 }

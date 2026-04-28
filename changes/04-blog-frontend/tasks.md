@@ -5,7 +5,7 @@
 3. [x] Implement API client (`services/api.ts`)
 4. [x] Write tests for `formatRelativeTime` utility
 5. [x] Implement `formatRelativeTime` in `utils/time.ts`
-6. [ ] Set up MSW mock handlers for dev/test API responses
+6. [x] Set up MSW mock handlers for dev/test API responses
 7. [x] Write tests for `TagPill` component
 8. [x] Implement `TagPill` component
 9. [x] Write tests for `PostCard` component (title, excerpt, tags, timestamp, counts)

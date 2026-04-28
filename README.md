@@ -45,8 +45,40 @@ Copy `.env.example` to `.env` and configure:
 | `ADMIN_PASSWORD` | `changeme` | Admin panel password |
 | `CORS_ORIGINS` | `http://localhost:5173` | Allowed CORS origins |
 | `WIDGET_SERVICE_URL` | `http://localhost:8000` | Widget service URL |
+| `AUTH_MODE` | `basic` | Admin auth mode (`basic` or `oauth`) |
+| `GITHUB_CLIENT_ID` | (empty) | GitHub OAuth app client ID |
+| `GITHUB_CLIENT_SECRET` | (empty) | GitHub OAuth app client secret |
+| `OAUTH_ALLOWED_USERS` | (empty) | Comma-separated GitHub usernames allowed into admin |
+| `SESSION_SECRET` | `change-me-to-a-random-32-byte-key` | Secret used to sign OAuth session JWTs |
+| `BASE_URL` | `http://localhost:8080` | Public backend base URL used for OAuth callback URLs |
 | `SERVE_STATIC` | (empty) | Set to `true` to serve frontend from backend |
 | `STATIC_DIR` | `./static` | Path to built frontend files |
+
+## Admin Authentication
+
+### Basic auth for local development
+
+Leave `AUTH_MODE=basic` (the default), then log in with `ADMIN_USERNAME` and `ADMIN_PASSWORD`.
+
+### GitHub OAuth for staging or production
+
+1. Create a GitHub OAuth app in GitHub Developer Settings.
+2. Set the homepage URL to your site or backend origin, for example `http://localhost:8080` in local testing.
+3. Set the authorization callback URL to `${BASE_URL}/api/v1/auth/callback`, for example `http://localhost:8080/api/v1/auth/callback`.
+4. Set `AUTH_MODE=oauth` in `.env`.
+5. Set `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` from the GitHub app.
+6. Set `OAUTH_ALLOWED_USERS` to a comma-separated allowlist of GitHub usernames.
+7. Set `SESSION_SECRET` to a long random secret.
+8. Restart the backend and use the `Sign in with GitHub` button on `/admin/login`.
+
+The backend keeps the OAuth session in an HTTP-only cookie. Switching `AUTH_MODE` back to `basic` preserves the existing username/password flow for local development.
+
+## Frontend API Mocks
+
+MSW handlers are available for tests and optional local UI work.
+
+- Tests start the MSW server automatically from [frontend/src/test-setup.ts](/Users/adamgoh/Documents/GitHub/neo/frontend/src/test-setup.ts).
+- To enable browser-side API mocks during `npm run dev`, start the frontend with `VITE_ENABLE_API_MOCKS=true`.
 
 ## Production Deployment
 

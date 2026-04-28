@@ -17,6 +17,7 @@ const samplePost: Post = {
   content_type: "markdown",
   tags: ["go", "intro"],
   published: true,
+  like_count: 0,
   created_at: "2026-04-10T10:00:00Z",
   updated_at: "2026-04-10T10:00:00Z",
 };

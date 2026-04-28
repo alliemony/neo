@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Layout } from '../../components/layout/Layout';
-import { MarkdownContent } from '../../components/blog/MarkdownContent';
-import { TagInput } from '../../components/admin/TagInput';
-import { useAuth } from '../../contexts/AuthContext';
-import { createAdminApi } from '../../services/adminApi';
-import { getTags } from '../../services/api';
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Layout } from "../../components/layout/Layout";
+import { MarkdownContent } from "../../components/blog/MarkdownContent";
+import { TagInput } from "../../components/admin/TagInput";
+import { useAuth } from "../../contexts/AuthContext";
+import { createAdminApi } from "../../services/adminApi";
+import { getTags } from "../../services/api";
 
 export function PostEditor() {
   const { slug } = useParams<{ slug: string }>();
@@ -13,13 +13,13 @@ export function PostEditor() {
   const { authHeader } = useAuth();
   const isNew = !slug;
 
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [published, setPublished] = useState(false);
   const [existingTags, setExistingTags] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
     getTags()
@@ -33,20 +33,23 @@ export function PostEditor() {
     if (!header) return;
     const api = createAdminApi(header);
 
-    api.listPosts().then((result) => {
-      const post = result.posts.find((p) => p.slug === slug);
-      if (post) {
-        setTitle(post.title);
-        setContent(post.content);
-        setTags(post.tags);
-        setPublished(post.published);
-      }
-    }).catch(() => {});
+    api
+      .listPosts()
+      .then((result) => {
+        const post = result.posts.find((p) => p.slug === slug);
+        if (post) {
+          setTitle(post.title);
+          setContent(post.content);
+          setTags(post.tags);
+          setPublished(post.published);
+        }
+      })
+      .catch(() => {});
   }, [slug, authHeader]);
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
-    setError('');
+    setError("");
     setSaving(true);
 
     const header = authHeader();
@@ -55,13 +58,19 @@ export function PostEditor() {
 
     try {
       if (isNew) {
-        await api.createPost({ title, content, tags, published });
+        await api.createPost({
+          title,
+          content,
+          content_type: "markdown",
+          tags,
+          published,
+        });
       } else {
         await api.updatePost(slug, { title, content, tags, published });
       }
-      navigate('/admin');
+      navigate("/admin");
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Save failed');
+      setError(err instanceof Error ? err.message : "Save failed");
     } finally {
       setSaving(false);
     }
@@ -70,7 +79,7 @@ export function PostEditor() {
   return (
     <Layout>
       <h1 className="font-heading text-2xl font-bold mb-6">
-        {isNew ? 'New Post' : 'Edit Post'}
+        {isNew ? "New Post" : "Edit Post"}
       </h1>
       <form onSubmit={handleSave}>
         <div className="lg:grid lg:grid-cols-2 lg:gap-6">
@@ -89,7 +98,10 @@ export function PostEditor() {
               />
             </div>
             <div>
-              <label htmlFor="content" className="block text-sm font-medium mb-1">
+              <label
+                htmlFor="content"
+                className="block text-sm font-medium mb-1"
+              >
                 Content
               </label>
               <textarea
@@ -102,7 +114,11 @@ export function PostEditor() {
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Tags</label>
-              <TagInput value={tags} onChange={setTags} existingTags={existingTags} />
+              <TagInput
+                value={tags}
+                onChange={setTags}
+                existingTags={existingTags}
+              />
             </div>
             <div className="flex items-center gap-2">
               <input
@@ -122,11 +138,11 @@ export function PostEditor() {
                 disabled={saving}
                 className="bg-accent text-white px-4 py-2 font-bold hover:opacity-90 disabled:opacity-50"
               >
-                {saving ? 'Saving…' : 'Save'}
+                {saving ? "Saving…" : "Save"}
               </button>
               <button
                 type="button"
-                onClick={() => navigate('/admin')}
+                onClick={() => navigate("/admin")}
                 className="border-[length:var(--border-width)] border-border px-4 py-2 text-sm"
               >
                 Cancel
@@ -139,7 +155,9 @@ export function PostEditor() {
               {content ? (
                 <MarkdownContent content={content} />
               ) : (
-                <p className="text-text-secondary text-sm">Start typing to see preview…</p>
+                <p className="text-text-secondary text-sm">
+                  Start typing to see preview…
+                </p>
               )}
             </div>
           </div>
