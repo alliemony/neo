@@ -29,11 +29,12 @@ func (s *PageService) Create(input model.CreatePageInput) (*model.Page, error) {
 	}
 
 	page := &model.Page{
-		Slug:      slug,
-		Title:     input.Title,
-		Content:   input.Content,
-		Published: input.Published,
-		SortOrder: input.SortOrder,
+		Slug:        slug,
+		Title:       input.Title,
+		Content:     input.Content,
+		ContentType: "markdown",
+		Published:   input.Published,
+		SortOrder:   input.SortOrder,
 	}
 
 	if err := s.repo.Create(page); err != nil {

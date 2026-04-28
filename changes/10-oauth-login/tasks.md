@@ -27,4 +27,4 @@
 17. [ ] Verify OAuth flow end-to-end with a test GitHub OAuth app
 18. [x] Verify basic auth still works when `AUTH_MODE=basic`
 19. [x] Update `.env.example` with new OAuth env vars
-20. [ ] Document OAuth setup steps in README
+20. [x] Document OAuth setup steps in README

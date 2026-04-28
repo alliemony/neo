@@ -28,5 +28,5 @@
 21. [x] Implement publish/draft toggle
 22. [x] Implement delete confirmation dialog
 23. [x] Implement page editor (reuse post editor patterns)
-24. [ ] Add protected admin routes to React Router
+24. [x] Add protected admin routes to React Router
 25. [ ] Verify full admin flow: login → create post → edit → publish → delete

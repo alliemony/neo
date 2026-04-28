@@ -1,7 +1,7 @@
-import { Link } from 'react-router-dom';
-import type { Post } from '../../types/post';
-import { TagPill } from './TagPill';
-import { formatRelativeTime } from '../../utils/time';
+import { Link } from "react-router-dom";
+import type { Post } from "../../types/post";
+import { TagPill } from "./TagPill";
+import { formatRelativeTime } from "../../utils/time";
 
 interface PostCardProps {
   post: Post;
@@ -9,7 +9,7 @@ interface PostCardProps {
 
 function excerpt(content: string, maxLen = 200): string {
   if (content.length <= maxLen) return content;
-  return content.slice(0, maxLen).trimEnd() + '…';
+  return content.slice(0, maxLen).trimEnd() + "…";
 }
 
 export function PostCard({ post }: PostCardProps) {
@@ -20,7 +20,9 @@ export function PostCard({ post }: PostCardProps) {
           {post.title}
         </Link>
       </h2>
-      <p className="text-text-secondary text-sm mb-3">{excerpt(post.content)}</p>
+      <p className="text-text-secondary text-sm mb-3">
+        {excerpt(post.content)}
+      </p>
       <div className="flex flex-wrap items-center gap-2">
         {post.tags.map((tag) => (
           <TagPill key={tag} tag={tag} />

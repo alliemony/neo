@@ -1,49 +1,79 @@
 package middleware
 
 import (
+	"encoding/json"
+	"net"
 	"net/http"
 	"sync"
 	"time"
 )
 
-// RateLimiter returns middleware that limits requests per IP.
-// window is how long to remember a request; if a second request arrives within the window, it's rejected.
-func RateLimiter(window time.Duration) func(http.Handler) http.Handler {
-	var mu sync.Mutex
-	clients := make(map[string]time.Time)
+// rateLimiter tracks request timestamps per IP using a sliding window.
+type rateLimiter struct {
+	mu     sync.Mutex
+	hits   map[string][]time.Time
+	window time.Duration
+	limit  int
+}
 
-	// Periodically clean up expired entries.
-	go func() {
-		for {
-			time.Sleep(window * 2)
-			mu.Lock()
-			now := time.Now()
-			for ip, t := range clients {
-				if now.Sub(t) > window {
-					delete(clients, ip)
-				}
-			}
-			mu.Unlock()
-		}
-	}()
-
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ip := r.RemoteAddr
-
-			mu.Lock()
-			last, exists := clients[ip]
-			if exists && time.Since(last) < window {
-				mu.Unlock()
-				w.Header().Set("Content-Type", "application/json")
-				w.WriteHeader(http.StatusTooManyRequests)
-				w.Write([]byte(`{"error":"too many requests"}`))
-				return
-			}
-			clients[ip] = time.Now()
-			mu.Unlock()
-
-			next.ServeHTTP(w, r)
-		})
+// NewRateLimiter creates a rate limiter that allows limit requests per window duration.
+func NewRateLimiter(window time.Duration, limit int) *rateLimiter {
+	return &rateLimiter{
+		hits:   make(map[string][]time.Time),
+		window: window,
+		limit:  limit,
 	}
+}
+
+// Middleware returns an HTTP handler that enforces the rate limit.
+func (rl *rateLimiter) Middleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ip := extractIP(r.RemoteAddr)
+		if !rl.allow(ip) {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusTooManyRequests)
+			json.NewEncoder(w).Encode(map[string]string{"error": "too many requests"})
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (rl *rateLimiter) allow(ip string) bool {
+	rl.mu.Lock()
+	defer rl.mu.Unlock()
+
+	now := time.Now()
+	cutoff := now.Add(-rl.window)
+
+	existing := rl.hits[ip]
+	var valid []time.Time
+	for _, t := range existing {
+		if t.After(cutoff) {
+			valid = append(valid, t)
+		}
+	}
+
+	if len(valid) >= rl.limit {
+		rl.hits[ip] = valid
+		return false
+	}
+
+	rl.hits[ip] = append(valid, now)
+	return true
+}
+
+func extractIP(remoteAddr string) string {
+	host, _, err := net.SplitHostPort(remoteAddr)
+	if err != nil {
+		return remoteAddr
+	}
+	return host
+}
+
+// RateLimiter returns middleware using a sliding window with a default limit of 10 requests.
+// Use NewRateLimiter for configurable limits.
+func RateLimiter(window time.Duration) func(http.Handler) http.Handler {
+	rl := NewRateLimiter(window, 10)
+	return rl.Middleware
 }

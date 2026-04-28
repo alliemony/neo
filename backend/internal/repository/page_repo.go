@@ -21,10 +21,13 @@ func NewPageRepo(db *sql.DB) *PageRepo {
 // Create inserts a new page.
 func (r *PageRepo) Create(page *model.Page) error {
 	now := time.Now().UTC()
+	if page.ContentType == "" {
+		page.ContentType = "markdown"
+	}
 	result, err := r.db.Exec(
-		`INSERT INTO pages (slug, title, content, published, sort_order, created_at, updated_at)
-		 VALUES (?, ?, ?, ?, ?, ?, ?)`,
-		page.Slug, page.Title, page.Content, page.Published, page.SortOrder, now, now,
+		`INSERT INTO pages (slug, title, content, content_type, published, sort_order, created_at, updated_at)
+		 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+		page.Slug, page.Title, page.Content, page.ContentType, page.Published, page.SortOrder, now, now,
 	)
 	if err != nil {
 		return fmt.Errorf("insert page: %w", err)
@@ -44,38 +47,42 @@ func (r *PageRepo) Create(page *model.Page) error {
 // GetBySlug returns a single page by its slug.
 func (r *PageRepo) GetBySlug(slug string) (*model.Page, error) {
 	row := r.db.QueryRow(
-		`SELECT id, slug, title, content, published, sort_order, created_at, updated_at
+		`SELECT id, slug, title, content, content_type, published, sort_order, created_at, updated_at
 		 FROM pages WHERE slug = ?`, slug,
 	)
 	return scanPage(row)
 }
 
-// ListPublished returns all published pages ordered by sort_order.
-func (r *PageRepo) ListPublished() ([]model.Page, error) {
-	rows, err := r.db.Query(
-		`SELECT id, slug, title, content, published, sort_order, created_at, updated_at
-		 FROM pages WHERE published = 1 ORDER BY sort_order ASC`,
-	)
+// List returns pages filtered by published status if publishedOnly is true.
+func (r *PageRepo) List(publishedOnly bool) ([]model.Page, error) {
+	var rows *sql.Rows
+	var err error
+	if publishedOnly {
+		rows, err = r.db.Query(
+			`SELECT id, slug, title, content, content_type, published, sort_order, created_at, updated_at
+			 FROM pages WHERE published = 1 ORDER BY sort_order ASC`,
+		)
+	} else {
+		rows, err = r.db.Query(
+			`SELECT id, slug, title, content, content_type, published, sort_order, created_at, updated_at
+			 FROM pages ORDER BY sort_order ASC`,
+		)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("list pages: %w", err)
 	}
 	defer rows.Close()
-
 	return scanPages(rows)
+}
+
+// ListPublished returns all published pages ordered by sort_order.
+func (r *PageRepo) ListPublished() ([]model.Page, error) {
+	return r.List(true)
 }
 
 // ListAll returns all pages ordered by sort_order (for admin).
 func (r *PageRepo) ListAll() ([]model.Page, error) {
-	rows, err := r.db.Query(
-		`SELECT id, slug, title, content, published, sort_order, created_at, updated_at
-		 FROM pages ORDER BY sort_order ASC`,
-	)
-	if err != nil {
-		return nil, fmt.Errorf("list all pages: %w", err)
-	}
-	defer rows.Close()
-
-	return scanPages(rows)
+	return r.List(false)
 }
 
 // Update updates an existing page by slug.
@@ -110,7 +117,7 @@ func scanPage(row *sql.Row) (*model.Page, error) {
 	var p model.Page
 	var published int
 
-	err := row.Scan(&p.ID, &p.Slug, &p.Title, &p.Content, &published, &p.SortOrder, &p.CreatedAt, &p.UpdatedAt)
+	err := row.Scan(&p.ID, &p.Slug, &p.Title, &p.Content, &p.ContentType, &published, &p.SortOrder, &p.CreatedAt, &p.UpdatedAt)
 	if err == sql.ErrNoRows {
 		return nil, model.ErrNotFound
 	}
@@ -127,7 +134,7 @@ func scanPages(rows *sql.Rows) ([]model.Page, error) {
 	for rows.Next() {
 		var p model.Page
 		var published int
-		if err := rows.Scan(&p.ID, &p.Slug, &p.Title, &p.Content, &published, &p.SortOrder, &p.CreatedAt, &p.UpdatedAt); err != nil {
+		if err := rows.Scan(&p.ID, &p.Slug, &p.Title, &p.Content, &p.ContentType, &published, &p.SortOrder, &p.CreatedAt, &p.UpdatedAt); err != nil {
 			return nil, fmt.Errorf("scan page row: %w", err)
 		}
 		p.Published = published != 0

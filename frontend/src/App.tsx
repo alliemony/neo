@@ -10,6 +10,7 @@ import { AdminLogin } from "./routes/AdminLogin";
 import { AdminDashboard } from "./routes/AdminDashboard";
 import { PostEditor } from "./routes/PostEditor";
 import { PageEditor } from "./routes/PageEditor";
+import { ProtectedRoute } from "./routes/ProtectedRoute";
 
 function NotFound() {
   return (
@@ -38,11 +39,46 @@ function App() {
           <Route path="/page/:slug" element={<PageView />} />
           <Route path="/widgets/:id" element={<WidgetView />} />
           <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/posts/new" element={<PostEditor />} />
-          <Route path="/admin/posts/:slug/edit" element={<PostEditor />} />
-          <Route path="/admin/pages/new" element={<PageEditor />} />
-          <Route path="/admin/pages/:slug/edit" element={<PageEditor />} />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/posts/new"
+            element={
+              <ProtectedRoute>
+                <PostEditor />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/posts/:slug/edit"
+            element={
+              <ProtectedRoute>
+                <PostEditor />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/pages/new"
+            element={
+              <ProtectedRoute>
+                <PageEditor />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/pages/:slug/edit"
+            element={
+              <ProtectedRoute>
+                <PageEditor />
+              </ProtectedRoute>
+            }
+          />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { Layout } from "./Layout";
@@ -23,26 +23,30 @@ function renderWithRouter(ui: React.ReactElement) {
 }
 
 describe("Layout", () => {
-  it("renders children in main content area", () => {
+  it("renders children in main content area", async () => {
     renderWithRouter(
       <Layout>
         <p>Main content</p>
       </Layout>,
     );
-    expect(screen.getByText("Main content")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Main content")).toBeInTheDocument();
+    });
   });
 
-  it("renders header and footer", () => {
+  it("renders header and footer", async () => {
     renderWithRouter(
       <Layout>
         <p>Content</p>
       </Layout>,
     );
-    expect(screen.getByText("neo")).toBeInTheDocument();
-    expect(screen.getByText(/built with care/)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("neo")).toBeInTheDocument();
+      expect(screen.getByText(/built with care/)).toBeInTheDocument();
+    });
   });
 
-  it("renders sidebar when provided", () => {
+  it("renders sidebar when provided", async () => {
     renderWithRouter(
       <Layout
         sidebar={
@@ -54,17 +58,21 @@ describe("Layout", () => {
         <p>Main content</p>
       </Layout>,
     );
-    expect(screen.getByText("Sidebar content")).toBeInTheDocument();
-    expect(screen.getByText("Main content")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Sidebar content")).toBeInTheDocument();
+      expect(screen.getByText("Main content")).toBeInTheDocument();
+    });
   });
 
-  it("renders without sidebar", () => {
+  it("renders without sidebar", async () => {
     renderWithRouter(
       <Layout>
         <p>Only main</p>
       </Layout>,
     );
-    expect(screen.getByText("Only main")).toBeInTheDocument();
-    expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Only main")).toBeInTheDocument();
+      expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
+    });
   });
 });

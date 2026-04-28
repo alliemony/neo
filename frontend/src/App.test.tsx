@@ -6,6 +6,7 @@ import App from "./App";
 const mockFetch = vi.fn();
 
 beforeEach(() => {
+  window.history.pushState({}, "", "/");
   vi.stubGlobal("fetch", mockFetch);
   mockFetch.mockImplementation((url: string) => {
     if (url.includes("/api/v1/auth/mode")) {
@@ -68,6 +69,22 @@ describe("App", () => {
     );
     await waitFor(() => {
       expect(screen.getByText(/built with care/)).toBeInTheDocument();
+    });
+  });
+
+  it("redirects anonymous admin requests to the login page", async () => {
+    window.history.pushState({}, "", "/admin");
+
+    render(
+      <HelmetProvider>
+        <App />
+      </HelmetProvider>,
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("heading", { name: "Admin Login" }),
+      ).toBeInTheDocument();
     });
   });
 });

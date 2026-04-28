@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { Header } from "./Header";
@@ -22,19 +22,25 @@ function renderWithRouter(ui: React.ReactElement) {
 }
 
 describe("Header", () => {
-  it("renders the site name", () => {
+  it("renders the site name", async () => {
     renderWithRouter(<Header />);
-    expect(screen.getByText("neo")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("neo")).toBeInTheDocument();
+    });
   });
 
-  it("renders blog navigation link", () => {
+  it("renders blog navigation link", async () => {
     renderWithRouter(<Header />);
-    expect(screen.getByText("blog")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("blog")).toBeInTheDocument();
+    });
   });
 
-  it("links site name to home", () => {
+  it("links site name to home", async () => {
     renderWithRouter(<Header />);
-    const link = screen.getByText("neo").closest("a");
-    expect(link).toHaveAttribute("href", "/");
+    await waitFor(() => {
+      const link = screen.getByText("neo").closest("a");
+      expect(link).toHaveAttribute("href", "/");
+    });
   });
 });

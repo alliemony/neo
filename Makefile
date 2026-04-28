@@ -21,7 +21,7 @@ test-backend: ## Run backend tests
 	cd backend && go test ./...
 
 test-widgets: ## Run widget tests
-	cd widgets && python -m pytest tests/
+	cd widgets && pip install -e ".[dev]" -q && python3 -m pytest tests/
 
 build: ## Build all for production
 	cd frontend && npm run build

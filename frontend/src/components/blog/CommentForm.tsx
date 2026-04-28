@@ -3,23 +3,29 @@ import type { CreateCommentInput } from "../../types/post";
 
 interface CommentFormProps {
   onSubmit: (input: CreateCommentInput) => Promise<void>;
+  error?: string;
 }
 
-export function CommentForm({ onSubmit }: CommentFormProps) {
+export function CommentForm({
+  onSubmit,
+  error: externalError,
+}: CommentFormProps) {
   const [authorName, setAuthorName] = useState("");
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [internalError, setInternalError] = useState<string | null>(null);
+
+  const error = externalError ?? internalError;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!authorName.trim() || !content.trim()) {
-      setError("Name and comment are required.");
+      setInternalError("Name and comment are required.");
       return;
     }
 
     setSubmitting(true);
-    setError(null);
+    setInternalError(null);
 
     try {
       await onSubmit({
@@ -29,7 +35,7 @@ export function CommentForm({ onSubmit }: CommentFormProps) {
       setAuthorName("");
       setContent("");
     } catch (err) {
-      setError(
+      setInternalError(
         err instanceof Error ? err.message : "Failed to submit comment.",
       );
     } finally {

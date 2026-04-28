@@ -100,13 +100,72 @@ Themes are defined as TypeScript token objects in `frontend/src/themes/`. Adding
 - Standard HTTP status codes (200, 201, 400, 401, 404, 500)
 - Error responses: `{"error": "description"}`
 
+## Documentation
+
+All documentation lives under `docs/`:
+
+| Path | Purpose |
+|------|---------|
+| `docs/references/` | Stable reference docs: architecture, design-system, API patterns |
+| `docs/implementation/` | Living implementation plan and milestone tracker |
+| `docs/proposals/` | One file per planned feature, written before implementation begins |
+
+### Keeping docs current
+
+Whenever you make a change to the codebase you **must** also update any affected documentation:
+- New or renamed API endpoints → update `docs/references/architecture.md`
+- New UI patterns or theme tokens → update `docs/references/design-system.md`
+- New deployment config → update `docs/references/deployment.md`
+- Completed milestone tasks → check them off in `docs/implementation/milestones.md`
+- Moved, added, or deleted files → verify all cross-file links still resolve
+
+Never let a PR go out with stale doc references.
+
 ## When Adding Features
 
+Follow this four-step workflow for every non-trivial feature:
+
+### Step 1 — Proposal
+
+Create a proposal file before writing any code:
+
+```
+docs/proposals/<feature-name>.md
+```
+
+The proposal must contain:
+- **Problem** — what gap or need this addresses
+- **Scope** — explicit list of what is and is not included
+- **Requirements** — broken-down, independently testable requirements (no requirement should be more than ~½ day of work)
+- **Open questions** — anything unresolved before design begins
+
+Keep requirements small enough that each maps to a single PR or task set.
+
+### Step 2 — OpenSpec plan
+
+Once the proposal is approved, generate the full implementation plan with OpenSpec:
+
+```
+/opsx:propose <feature-name>
+```
+
+This produces `changes/<feature-name>/` containing `proposal.md`, `design.md`, and `tasks.md`.
+The tasks list is the authoritative checklist for implementation.
+
+### Step 3 — Implement (TDD)
+
+Work through the tasks checklist:
 1. Write failing tests first (TDD)
-2. Implement the minimum to pass
+2. Implement the minimum to make them pass
 3. Refactor while tests stay green
 4. Ensure no regressions (`make test`)
-5. Keep changes focused -- one feature per PR
+5. Update any affected docs (see [Documentation](#documentation) above)
+
+### Step 4 — Close out
+
+- Mark all tasks done in `changes/<feature-name>/tasks.md`
+- Update `docs/implementation/milestones.md` if the feature is milestone-tracked
+- Keep changes focused — one feature per PR
 
 ## When Fixing Bugs
 
@@ -115,3 +174,4 @@ Themes are defined as TypeScript token objects in `frontend/src/themes/`. Adding
 3. Fix the bug
 4. Verify the test passes
 5. Check for similar bugs nearby
+6. Update docs if the fix changes any publicly observable behaviour

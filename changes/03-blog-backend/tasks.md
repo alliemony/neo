@@ -12,5 +12,5 @@
 10. [x] Add CORS middleware configuration
 11. [x] Register post routes in `cmd/server/main.go`
 12. [x] Create seed data loader for development
-13. [ ] Write integration test: start server, hit API, verify JSON response
+13. [x] Write integration test: start server, hit API, verify JSON response
 14. [x] Verify all `go test ./...` pass
