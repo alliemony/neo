@@ -9,6 +9,7 @@ on:
 jobs:
   deploy:
     name: Deploy to Fly.io
+    environment: production
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
