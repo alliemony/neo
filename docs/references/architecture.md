@@ -23,8 +23,8 @@
            ▼
 ┌──────────────────────┐
 │   Database           │
-│   SQLite (dev)       │
-│   PostgreSQL (prod)  │
+│   SQLite (dev + low-cost prod)       │
+│   PostgreSQL (optional prod)  │
 └──────────────────────┘
 ```
 
@@ -35,7 +35,7 @@
 | **Frontend** | React 18, Vite, Tailwind CSS, React Router | Fast dev builds, utility-first CSS, SPA routing |
 | **Backend API** | Go (Chi router) | Fast, strongly typed, single binary deployment |
 | **Widget Service** | Python (FastAPI) | Native HuggingFace/ML ecosystem, notebook support |
-| **Database** | SQLite (dev) / PostgreSQL (prod) | Zero-config locally, scalable in production |
+| **Database** | SQLite (dev + low-cost production) / PostgreSQL (optional production) | Zero-config locally, lightweight deployment, scale path available |
 | **Auth** | Basic auth (phase 1), OAuth2 SSO (phase 2) | Progressive security complexity |
 
 ### Why Go over Node for the backend?
