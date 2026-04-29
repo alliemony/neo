@@ -162,14 +162,14 @@ Fly.io is a good fit because:
            └──────┬───────┘  └──────────────┘
                   │
            ┌──────▼───────┐
-           │  PostgreSQL   │
+           │  SQLite / PostgreSQL   │
            └──────────────┘
 ```
 
 In production:
 - Frontend is pre-built static files served from CDN or the Go backend itself
 - Go backend serves both the API and the static frontend files
-- PostgreSQL replaces SQLite
+- SQLite remains a supported low-cost production option with a file-backed database; PostgreSQL is optional when more database scale or managed features are needed
 - HTTPS via platform TLS or Caddy auto-TLS
 
 ### Environment Management
@@ -184,6 +184,8 @@ Key production environment variables:
 ```
 PORT=8080
 DATABASE_URL=postgres://user:pass@host:5432/neo
+# Or for a lightweight file-backed deployment:
+# DATABASE_URL=sqlite:///data/neo.db
 ADMIN_USERNAME=<set-in-platform>
 ADMIN_PASSWORD=<bcrypt-hash>
 CORS_ORIGINS=https://yourdomain.com

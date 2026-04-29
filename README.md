@@ -7,7 +7,7 @@ Personal web garden — a blog, notebook, and widget platform with a retro aesth
 - **Frontend**: React + Vite + Tailwind CSS + TypeScript
 - **Backend**: Go with Chi router (handler → service → repository)
 - **Widgets**: Python FastAPI service for ML widget embedding
-- **Database**: SQLite (dev), PostgreSQL (prod)
+- **Database**: SQLite (dev + lightweight production), PostgreSQL (optional larger production)
 
 ## Quick Start
 
@@ -40,7 +40,7 @@ Copy `.env.example` to `.env` and configure:
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `PORT` | `8080` | Backend server port |
-| `DATABASE_URL` | `sqlite://neo.db` | Database connection (`sqlite://` or `postgres://`) |
+| `DATABASE_URL` | `sqlite://neo.db` | Database connection (`sqlite://` for file-based SQLite or `postgres://` for hosted Postgres) |
 | `ADMIN_USERNAME` | `admin` | Admin panel username |
 | `ADMIN_PASSWORD` | `changeme` | Admin panel password |
 | `CORS_ORIGINS` | `http://localhost:5173` | Allowed CORS origins |
@@ -100,6 +100,8 @@ fly deploy
 
 The production Dockerfile (`Dockerfile.production`) builds the frontend and backend into a single image with static file serving enabled.
 
+> For a lower-cost deployment that avoids a separate hosted database, set `DATABASE_URL=sqlite:///data/neo.db` and mount a persistent volume for `/data`.
+>
 ### Docker (self-hosted)
 
 ```bash
