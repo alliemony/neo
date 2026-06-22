@@ -63,7 +63,7 @@ func newRouter(cfg config.Config, db *sql.DB) http.Handler {
 	r.Use(chimw.Logger)
 	r.Use(chimw.Recoverer)
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{cfg.CORSOrigins},
+		AllowedOrigins:   cfg.CORSOrigins,
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
 		AllowCredentials: true,
@@ -80,7 +80,7 @@ func newRouter(cfg config.Config, db *sql.DB) http.Handler {
 
 	commentRateLimiter := middleware.RateLimiter(30 * time.Second)
 
-	siteURL := cfg.CORSOrigins
+	siteURL := cfg.BaseURL
 	rssHandler := handler.NewRSSHandler(postService, siteURL)
 
 	// Select auth middleware based on AUTH_MODE

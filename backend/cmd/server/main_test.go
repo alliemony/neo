@@ -33,7 +33,7 @@ func TestNewRouter_PostsEndpointReturnsJSON(t *testing.T) {
 	}
 
 	router := newRouter(config.Config{
-		CORSOrigins:   "http://localhost:5173",
+		CORSOrigins:   []string{"http://localhost:5173"},
 		AuthMode:      "basic",
 		AdminUsername: "admin",
 		AdminPassword: "changeme",
