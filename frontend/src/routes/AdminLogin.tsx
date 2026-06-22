@@ -4,7 +4,7 @@ import { Layout } from "../components/layout/Layout";
 import { useAuth } from "../hooks/useAuth";
 import { adminGetPosts } from "../services/api";
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8080";
+const API_BASE = import.meta.env.VITE_API_URL || "";
 
 export function AdminLogin() {
   const [username, setUsername] = useState("");
