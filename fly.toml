@@ -15,6 +15,7 @@ primary_region = 'sin'
   STATIC_DIR = "/app/static"
   AUTH_MODE = "oauth"
   DATABASE_URL = "sqlite:///data/neo.db"
+  CORS_ORIGINS="https://neo-*.fly.dev/"
 
 [http_service]
   internal_port = 8080
