@@ -10,7 +10,7 @@ type Config struct {
 	DatabaseURL      string
 	AdminUsername    string
 	AdminPassword    string
-	CORSOrigins      string
+	CORSOrigins      []string
 	WidgetServiceURL string
 	ServeStatic      bool
 	StaticDir        string
@@ -34,12 +34,20 @@ func Load() Config {
 		}
 	}
 
+	corsOriginsStr := getEnv("CORS_ORIGINS", "http://localhost:5173")
+	var corsOrigins []string
+	for _, origin := range strings.Split(corsOriginsStr, ",") {
+		if trimmed := strings.TrimSpace(origin); trimmed != "" {
+			corsOrigins = append(corsOrigins, trimmed)
+		}
+	}
+
 	return Config{
 		Port:              getEnv("PORT", "8080"),
 		DatabaseURL:       getEnv("DATABASE_URL", "sqlite://neo.db"),
 		AdminUsername:     getEnv("ADMIN_USERNAME", "admin"),
 		AdminPassword:     getEnv("ADMIN_PASSWORD", "changeme"),
-		CORSOrigins:       getEnv("CORS_ORIGINS", "http://localhost:5173"),
+		CORSOrigins:       corsOrigins,
 		WidgetServiceURL:  getEnv("WIDGET_SERVICE_URL", "http://localhost:8000"),
 		ServeStatic:       getEnv("SERVE_STATIC", "") == "true",
 		StaticDir:         getEnv("STATIC_DIR", "./static"),
