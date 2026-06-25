@@ -69,15 +69,18 @@ neo/
 │   │   ├── main.tsx
 │   │   ├── App.tsx
 │   │   ├── routes/           # Page-level route components
-│   │   │   ├── Home.tsx
-│   │   │   ├── Post.tsx
-│   │   │   ├── Admin.tsx
-│   │   │   └── NotFound.tsx
+│   │   │   ├── Home.tsx       # / — hero, recent posts, now, tags
+│   │   │   ├── Blog.tsx       # /blog — post list with search/filter
+│   │   │   ├── PostView.tsx   # /blog/:slug — single post
+│   │   │   ├── About.tsx      # /about — about page (static)
+│   │   │   ├── Recs.tsx       # /recs — recommendations (static)
+│   │   │   ├── Widgets.tsx    # /widgets — widget gallery
+│   │   │   ├── TagFeed.tsx    # /tag/:tag — tag filtered posts
+│   │   │   └── admin/         # /admin/* — admin routes
 │   │   ├── components/       # Reusable UI components
 │   │   │   ├── layout/
 │   │   │   │   ├── Header.tsx
-│   │   │   │   ├── Footer.tsx
-│   │   │   │   └── Sidebar.tsx
+│   │   │   │   └── Footer.tsx
 │   │   │   ├── blog/
 │   │   │   │   ├── PostCard.tsx
 │   │   │   │   ├── PostList.tsx

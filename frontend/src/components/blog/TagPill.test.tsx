@@ -13,15 +13,23 @@ describe('TagPill', () => {
     expect(screen.getByText('python')).toBeInTheDocument();
   });
 
-  it('links to the tag filter page', () => {
+  it('links to the blog filtered by tag', () => {
     renderWithRouter(<TagPill tag="python" />);
     const link = screen.getByRole('link', { name: 'python' });
-    expect(link).toHaveAttribute('href', '/tag/python');
+    expect(link).toHaveAttribute('href', '/blog?tag=python');
   });
 
   it('applies active styling when active', () => {
     renderWithRouter(<TagPill tag="python" active />);
     const link = screen.getByRole('link', { name: 'python' });
-    expect(link.className).toContain('bg-accent');
+    expect(link).toBeInTheDocument();
+    // active uses inline style with inverted colors, not bg-accent class
+    expect(link.style.color).toBe('rgb(255, 255, 255)');
+  });
+
+  it('renders as span when asSpan is true', () => {
+    renderWithRouter(<TagPill tag="python" asSpan />);
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    expect(screen.getByText('python').tagName).toBe('SPAN');
   });
 });

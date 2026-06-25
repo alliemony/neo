@@ -25,7 +25,7 @@ describe("Header", () => {
   it("renders the site name", async () => {
     renderWithRouter(<Header />);
     await waitFor(() => {
-      expect(screen.getByText("neo")).toBeInTheDocument();
+      expect(screen.getByText("allieg.dev")).toBeInTheDocument();
     });
   });
 
@@ -39,7 +39,7 @@ describe("Header", () => {
   it("links site name to home", async () => {
     renderWithRouter(<Header />);
     await waitFor(() => {
-      const link = screen.getByText("neo").closest("a");
+      const link = screen.getByText("allieg.dev").closest("a");
       expect(link).toHaveAttribute("href", "/");
     });
   });

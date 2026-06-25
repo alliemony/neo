@@ -1,41 +1,41 @@
 import { Link } from "react-router-dom";
 import type { Post } from "../../types/post";
 import { TagPill } from "./TagPill";
-import { formatRelativeTime } from "../../utils/time";
 
 interface PostCardProps {
   post: Post;
 }
 
-function excerpt(content: string, maxLen = 200): string {
-  if (content.length <= maxLen) return content;
-  return content.slice(0, maxLen).trimEnd() + "…";
+function formatDate(iso: string): string {
+  const d = new Date(iso);
+  return d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+}
+
+function truncate(text: string, max = 180): string {
+  const plain = text.replace(/<[^>]+>/g, "");
+  if (plain.length <= max) return plain;
+  return plain.slice(0, max).trimEnd() + "…";
 }
 
 export function PostCard({ post }: PostCardProps) {
   return (
-    <article className="border-[length:var(--border-width)] border-border bg-surface p-[var(--card-padding)]">
-      <h2 className="font-heading text-xl font-bold mb-2">
-        <Link to={`/blog/${post.slug}`} className="hover:text-accent">
+    <article className="py-4 border-t border-border first:border-t-0">
+      <Link to={`/blog/${post.slug}`} className="block no-underline group">
+        <div className="text-[14px] text-text-secondary mb-1">{formatDate(post.created_at)}</div>
+        <h2 className="font-semibold text-[20px] text-text-primary mb-1.5 leading-snug transition-colors duration-150 group-hover:text-accent">
           {post.title}
-        </Link>
-      </h2>
-      <p className="text-text-secondary text-sm mb-3">
-        {excerpt(post.content)}
-      </p>
-      <div className="flex flex-wrap items-center gap-2">
-        {post.tags.map((tag) => (
-          <TagPill key={tag} tag={tag} />
-        ))}
-        <time
-          role="time"
-          dateTime={post.created_at}
-          title={new Date(post.created_at).toISOString()}
-          className="text-xs text-text-secondary ml-auto"
-        >
-          {formatRelativeTime(post.created_at)}
-        </time>
-      </div>
+        </h2>
+        <p className="text-[16px] text-text-secondary leading-relaxed mb-2.5">
+          {truncate(post.content)}
+        </p>
+      </Link>
+      {post.tags.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {post.tags.map((tag) => (
+            <TagPill key={tag} tag={tag} />
+          ))}
+        </div>
+      )}
     </article>
   );
 }

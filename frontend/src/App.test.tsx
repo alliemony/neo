@@ -46,18 +46,18 @@ describe("App", () => {
       </HelmetProvider>,
     );
     await waitFor(() => {
-      expect(screen.getByText("neo", { selector: "h1" })).toBeInTheDocument();
+      expect(screen.getByText("Allie Goh")).toBeInTheDocument();
     });
   });
 
-  it("shows the site tagline", async () => {
+  it("shows the hero tagline", async () => {
     render(
       <HelmetProvider>
         <App />
       </HelmetProvider>,
     );
     await waitFor(() => {
-      expect(screen.getByText("personal web garden")).toBeInTheDocument();
+      expect(screen.getAllByText(/digital garden/).length).toBeGreaterThan(0);
     });
   });
 
@@ -68,7 +68,7 @@ describe("App", () => {
       </HelmetProvider>,
     );
     await waitFor(() => {
-      expect(screen.getByText(/built with care/)).toBeInTheDocument();
+      expect(screen.getByText(/made with too much coffee/)).toBeInTheDocument();
     });
   });
 

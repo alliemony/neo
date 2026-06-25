@@ -2,7 +2,6 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { Layout } from "./Layout";
-import { Sidebar } from "./Sidebar";
 
 beforeEach(() => {
   vi.stubGlobal(
@@ -41,26 +40,8 @@ describe("Layout", () => {
       </Layout>,
     );
     await waitFor(() => {
-      expect(screen.getByText("neo")).toBeInTheDocument();
-      expect(screen.getByText(/built with care/)).toBeInTheDocument();
-    });
-  });
-
-  it("renders sidebar when provided", async () => {
-    renderWithRouter(
-      <Layout
-        sidebar={
-          <Sidebar>
-            <p>Sidebar content</p>
-          </Sidebar>
-        }
-      >
-        <p>Main content</p>
-      </Layout>,
-    );
-    await waitFor(() => {
-      expect(screen.getByText("Sidebar content")).toBeInTheDocument();
-      expect(screen.getByText("Main content")).toBeInTheDocument();
+      expect(screen.getByText("allieg.dev")).toBeInTheDocument();
+      expect(screen.getByText(/made with too much coffee/)).toBeInTheDocument();
     });
   });
 

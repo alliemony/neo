@@ -1,36 +1,47 @@
-import { Link } from "react-router-dom";
-import { usePages } from "../../hooks/usePages";
+import { Link, useLocation } from "react-router-dom";
+import { site } from "../../config";
+
+const NAV_LINKS = [
+  { to: "/", label: "home" },
+  { to: "/blog", label: "blog" },
+  { to: "/widgets", label: "widgets" },
+  { to: "/about", label: "about" },
+  { to: "/recs", label: "recs" },
+];
 
 export function Header() {
-  const { pages } = usePages();
+  const location = useLocation();
+
+  function isActive(to: string) {
+    if (to === "/") return location.pathname === "/";
+    return location.pathname.startsWith(to);
+  }
 
   return (
-    <header className="border-b-2 border-border">
-      <nav className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-        <Link
-          to="/"
-          className="font-heading text-2xl font-bold text-text-primary no-underline"
-        >
-          neo
-        </Link>
-        <div className="flex gap-6 font-heading text-sm">
-          <Link
-            to="/"
-            className="text-text-secondary hover:text-accent no-underline"
-          >
-            blog
-          </Link>
-          {pages.map((page) => (
+    <nav className="max-w-[700px] mx-auto px-6 py-5 flex items-center gap-4 flex-wrap">
+      <Link
+        to="/"
+        className="font-bold text-lg text-accent no-underline mr-auto tracking-tight hover:text-accent-alt"
+        style={{ fontFamily: "inherit" }}
+      >
+        {site.name}
+      </Link>
+      <ul className="flex list-none gap-0.5 flex-wrap p-0 m-0">
+        {NAV_LINKS.map(({ to, label }) => (
+          <li key={to} className="flex">
             <Link
-              key={page.slug}
-              to={`/page/${page.slug}`}
-              className="text-text-secondary hover:text-accent no-underline"
+              to={to}
+              className={`text-[15px] no-underline px-2.5 py-1 rounded-md transition-all duration-150 ${
+                isActive(to)
+                  ? "text-accent bg-[oklch(0.95_0.03_25)]"
+                  : "text-text-secondary hover:text-text-primary hover:bg-surface"
+              }`}
             >
-              {page.title.toLowerCase()}
+              {label}
             </Link>
-          ))}
-        </div>
-      </nav>
-    </header>
+          </li>
+        ))}
+      </ul>
+    </nav>
   );
 }

@@ -28,20 +28,21 @@ function renderPageView(slug: string) {
 
 describe("PageView", () => {
   it("renders page title and content", async () => {
-    mockFetch
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve([]) })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            id: 1,
-            slug: "about",
-            title: "About",
-            content: "# About Me\n\nHello world",
-            content_type: "markdown",
-            published: true,
-          }),
-      });
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          id: 1,
+          slug: "about",
+          title: "About",
+          content: "# About Me\n\nHello world",
+          content_type: "markdown",
+          published: true,
+          sort_order: 0,
+          created_at: "2026-01-01T00:00:00Z",
+          updated_at: "2026-01-01T00:00:00Z",
+        }),
+    });
 
     renderPageView("about");
 
@@ -53,9 +54,7 @@ describe("PageView", () => {
   });
 
   it("shows 404 for non-existent page", async () => {
-    mockFetch
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve([]) })
-      .mockResolvedValueOnce({ ok: false, status: 404 });
+    mockFetch.mockResolvedValueOnce({ ok: false, status: 404 });
 
     renderPageView("nonexistent");
 

@@ -2,33 +2,35 @@
 @plugin "@tailwindcss/typography";
 
 @theme {
-  --color-bg: var(--color-bg, #FAFAF8);
-  --color-surface: var(--color-surface, #FFFFFF);
-  --color-border: var(--color-border, #2D2D2D);
-  --color-text-primary: var(--color-text-primary, #1A1A1A);
-  --color-text-secondary: var(--color-text-secondary, #6B6B6B);
-  --color-accent: var(--color-accent, #E85D3A);
-  --color-accent-alt: var(--color-accent-alt, #3A7CE8);
-  --color-tag-bg: var(--color-tag-bg, #F0EDE6);
-  --color-success: var(--color-success, #2D8A4E);
-  --color-code-bg: var(--color-code-bg, #F5F2EB);
+  --color-bg: var(--color-bg, #fefcf8);
+  --color-surface: var(--color-surface, #f4f0e8);
+  --color-border: var(--color-border, #e2dbd0);
+  --color-text-primary: var(--color-text-primary, #302b26);
+  --color-text-secondary: var(--color-text-secondary, #5a5550);
+  --color-accent: var(--color-accent, #c04830);
+  --color-accent-alt: var(--color-accent-alt, #a33c28);
+  --color-tag-bg: var(--color-tag-bg, #f4f0e8);
+  --color-success: var(--color-success, #287848);
+  --color-code-bg: var(--color-code-bg, #eae5db);
 
-  --font-heading: var(--font-heading, "JetBrains Mono", monospace);
-  --font-body: var(--font-body, "Inter", system-ui, sans-serif);
-  --font-code: var(--font-code, "JetBrains Mono", monospace);
+  --font-heading: var(--font-heading, system-ui, -apple-system, 'Segoe UI', sans-serif);
+  --font-body: var(--font-body, system-ui, -apple-system, 'Segoe UI', sans-serif);
+  --font-code: var(--font-code, 'Courier Prime', 'Courier New', monospace);
 }
 
 body {
   font-family: var(--font-body);
   background-color: var(--color-bg);
-  color: var(--color-text-primary);
-  line-height: 1.7;
+  color: var(--color-text-secondary);
+  line-height: 1.65;
   margin: 0;
+  -webkit-font-smoothing: antialiased;
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
   line-height: 1.2;
+  color: var(--color-text-primary);
 }
 
 code, pre {
@@ -38,3 +40,19 @@ code, pre {
 *, *::before, *::after {
   border-color: var(--color-border);
 }
+
+a {
+  color: var(--color-accent);
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  transition: color 0.15s;
+}
+
+a:hover {
+  color: var(--color-accent-alt);
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--color-surface); }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-text-secondary); }

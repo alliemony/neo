@@ -4,17 +4,15 @@ import { Footer } from './Footer';
 
 interface LayoutProps {
   children: ReactNode;
-  sidebar?: ReactNode;
 }
 
-export function Layout({ children, sidebar }: LayoutProps) {
+export function Layout({ children }: LayoutProps) {
   return (
-    <div className="min-h-screen bg-bg text-text-primary font-body">
+    <div className="min-h-screen bg-bg text-text-secondary font-body">
       <Header />
-      <div className="max-w-6xl mx-auto px-4 py-8 lg:flex lg:gap-8">
-        <main className="flex-1 min-w-0">{children}</main>
-        {sidebar}
-      </div>
+      <main className="max-w-[700px] mx-auto px-6 py-5 pb-20">
+        {children}
+      </main>
       <Footer />
     </div>
   );
