@@ -80,3 +80,86 @@ export interface UpdatePageInput {
   published?: boolean;
   sort_order?: number;
 }
+
+export interface Rec {
+  id: number;
+  name: string;
+  href: string | null;
+  section: string;
+  tag: string;
+  tag_bg: string;
+  tag_color: string;
+  description: string;
+  published: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RecSection {
+  title: string;
+  items: Rec[];
+}
+
+export interface CreateRecInput {
+  name: string;
+  href?: string | null;
+  section: string;
+  tag: string;
+  tag_bg: string;
+  tag_color: string;
+  description: string;
+  published: boolean;
+  sort_order?: number;
+}
+
+export interface UpdateRecInput {
+  name?: string;
+  href?: string | null;
+  section?: string;
+  tag?: string;
+  tag_bg?: string;
+  tag_color?: string;
+  description?: string;
+  published?: boolean;
+  sort_order?: number;
+}
+
+export interface MusicRec {
+  id: number;
+  title: string;
+  artist: string;
+  album: string | null;
+  cover_url: string | null;
+  spotify_url: string | null;
+  apple_url: string | null;
+  note: string | null;
+  published: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateMusicRecInput {
+  title: string;
+  artist: string;
+  album?: string | null;
+  cover_url?: string | null;
+  spotify_url?: string | null;
+  apple_url?: string | null;
+  note?: string | null;
+  published: boolean;
+  sort_order?: number;
+}
+
+export interface UpdateMusicRecInput {
+  title?: string;
+  artist?: string;
+  album?: string | null;
+  cover_url?: string | null;
+  spotify_url?: string | null;
+  apple_url?: string | null;
+  note?: string | null;
+  published?: boolean;
+  sort_order?: number;
+}

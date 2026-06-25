@@ -10,7 +10,16 @@ import type {
   UpdatePostInput,
   CreatePageInput,
   UpdatePageInput,
+  Rec,
+  RecSection,
+  CreateRecInput,
+  UpdateRecInput,
+  MusicRec,
+  CreateMusicRecInput,
+  UpdateMusicRecInput,
 } from '../types/post';
+
+type Credentials = { username: string; password: string } | null;
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
@@ -179,6 +188,76 @@ export async function adminDeletePage(
 ): Promise<void> {
   const response = await fetch(
     `${API_BASE}/api/v1/admin/pages/${slug}`,
+    adminFetchOptions(credentials, 'DELETE'),
+  );
+  if (!response.ok) throw new Error(`API error: ${response.status}`);
+}
+
+// Public recs endpoint
+export async function getRecs(): Promise<{ sections: RecSection[] }> {
+  return fetchJSON<{ sections: RecSection[] }>(`${API_BASE}/api/v1/recs`);
+}
+
+// Admin recs endpoints — credentials is null in OAuth mode (uses cookies)
+export async function adminGetRecs(credentials: Credentials): Promise<{ recs: Rec[] }> {
+  return fetchJSON<{ recs: Rec[] }>(
+    `${API_BASE}/api/v1/admin/recs`,
+    adminFetchOptions(credentials),
+  );
+}
+
+export async function adminCreateRec(credentials: Credentials, input: CreateRecInput): Promise<Rec> {
+  return fetchJSON<Rec>(
+    `${API_BASE}/api/v1/admin/recs`,
+    adminFetchOptions(credentials, 'POST', input),
+  );
+}
+
+export async function adminUpdateRec(credentials: Credentials, id: number, input: UpdateRecInput): Promise<Rec> {
+  return fetchJSON<Rec>(
+    `${API_BASE}/api/v1/admin/recs/${id}`,
+    adminFetchOptions(credentials, 'PUT', input),
+  );
+}
+
+export async function adminDeleteRec(credentials: Credentials, id: number): Promise<void> {
+  const response = await fetch(
+    `${API_BASE}/api/v1/admin/recs/${id}`,
+    adminFetchOptions(credentials, 'DELETE'),
+  );
+  if (!response.ok) throw new Error(`API error: ${response.status}`);
+}
+
+// Public music endpoint
+export async function getMusic(): Promise<{ recs: MusicRec[] }> {
+  return fetchJSON<{ recs: MusicRec[] }>(`${API_BASE}/api/v1/music`);
+}
+
+// Admin music endpoints — credentials is null in OAuth mode (uses cookies)
+export async function adminGetMusic(credentials: Credentials): Promise<{ recs: MusicRec[] }> {
+  return fetchJSON<{ recs: MusicRec[] }>(
+    `${API_BASE}/api/v1/admin/music`,
+    adminFetchOptions(credentials),
+  );
+}
+
+export async function adminCreateMusic(credentials: Credentials, input: CreateMusicRecInput): Promise<MusicRec> {
+  return fetchJSON<MusicRec>(
+    `${API_BASE}/api/v1/admin/music`,
+    adminFetchOptions(credentials, 'POST', input),
+  );
+}
+
+export async function adminUpdateMusic(credentials: Credentials, id: number, input: UpdateMusicRecInput): Promise<MusicRec> {
+  return fetchJSON<MusicRec>(
+    `${API_BASE}/api/v1/admin/music/${id}`,
+    adminFetchOptions(credentials, 'PUT', input),
+  );
+}
+
+export async function adminDeleteMusic(credentials: Credentials, id: number): Promise<void> {
+  const response = await fetch(
+    `${API_BASE}/api/v1/admin/music/${id}`,
     adminFetchOptions(credentials, 'DELETE'),
   );
   if (!response.ok) throw new Error(`API error: ${response.status}`);
