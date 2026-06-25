@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { describe, it, expect, vi, afterEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import { PostCard } from "./PostCard";
 import type { Post } from "../../types/post";
 
@@ -23,13 +23,9 @@ const samplePost: Post = {
 };
 
 describe("PostCard", () => {
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
   it("renders the post title as a link", () => {
     renderWithRouter(<PostCard post={samplePost} />);
-    const link = screen.getByRole("link", { name: "Hello World" });
+    const link = screen.getByRole("link", { name: /Hello World/ });
     expect(link).toHaveAttribute("href", "/blog/hello-world");
   });
 
@@ -44,21 +40,12 @@ describe("PostCard", () => {
     expect(screen.getByText("intro")).toBeInTheDocument();
   });
 
-  it("renders a relative timestamp", () => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date("2026-04-10T12:00:00Z"));
-
+  it("renders a formatted date", () => {
     renderWithRouter(<PostCard post={samplePost} />);
-    expect(screen.getByText("2 hours ago")).toBeInTheDocument();
+    expect(screen.getByText(/April 10, 2026/)).toBeInTheDocument();
   });
 
-  it("uses a time element with full datetime", () => {
-    renderWithRouter(<PostCard post={samplePost} />);
-    const timeEl = screen.getByRole("time");
-    expect(timeEl).toHaveAttribute("dateTime", samplePost.created_at);
-  });
-
-  it("renders with retro styling (border, no radius)", () => {
+  it("renders with border styling", () => {
     const { container } = renderWithRouter(<PostCard post={samplePost} />);
     const card = container.querySelector("article");
     expect(card).toBeInTheDocument();

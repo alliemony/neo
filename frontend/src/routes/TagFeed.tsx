@@ -1,8 +1,6 @@
 import { useParams, useSearchParams, Link } from "react-router-dom";
 import { Layout } from "../components/layout/Layout";
-import { Sidebar } from "../components/layout/Sidebar";
 import { PostList } from "../components/blog/PostList";
-import { TagCloud } from "../components/blog/TagCloud";
 import { usePosts } from "../hooks/usePosts";
 
 export function TagFeed() {
@@ -12,19 +10,11 @@ export function TagFeed() {
 
   const { posts, total, loading, error } = usePosts({ tag, page });
 
-  const sidebar = (
-    <Sidebar>
-      <TagCloud />
-    </Sidebar>
-  );
-
   return (
-    <Layout sidebar={sidebar}>
+    <Layout>
       <div className="mb-8">
-        <Link to="/" className="text-accent hover:underline text-sm">
-          ← All posts
-        </Link>
-        <h1 className="font-heading text-2xl font-bold mt-2">
+        <Link to="/blog" className="text-accent hover:text-accent-alt text-sm">← All posts</Link>
+        <h1 className="text-[26px] font-bold text-text-primary mt-2">
           Posts tagged <span className="text-accent">#{tag}</span>
         </h1>
       </div>

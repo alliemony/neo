@@ -2,32 +2,34 @@
 
 ## Aesthetic Direction
 
-**Retro-modern**: Inspired by radicle.xyz's technical minimalism blended with warmth and approachability. The site should feel like a well-organized personal workshop -- clean, purposeful, with personality in the details.
+**Warm minimal**: Clean, friendly, readable — like a well-tended personal space. System fonts, warm cream tones, soft borders, and colorful tag pills. Single-column 700px layout matching allieg.dev.
 
 ### Core Visual Characteristics
 
-- **Monospace typography** for headers and code, paired with a clean sans-serif for body text
-- **Stark borders and box outlines** instead of soft shadows (CSS `border`, not `box-shadow`)
-- **Flat color blocks** -- no gradients, no skeuomorphism
-- **Grid-based layouts** with generous whitespace
-- **High contrast** for readability
-- **Subtle color accents** for warmth (a retro palette with muted tones + one vibrant accent)
+- **System UI typography** for both headings and body — no monospace headings
+- **Soft 1px borders** in a warm beige tone — not heavy outlines
+- **Flat color blocks** — no gradients, no skeuomorphism
+- **Single-column layout** at max-width 700px
+- **Colorful hash-based tag pills** — each tag consistently maps to a color from an 8-color palette
+- **Warm cream background** with parchment surface tones
 
 ## Color Palette
 
-### Default "Retro Terminal" Theme
+### Default "Retro" Theme (allieg.dev warm palette)
 
 ```
-Background:     #FAFAF8  (warm off-white)
-Surface:        #FFFFFF  (cards, panels)
-Border:         #2D2D2D  (stark, visible borders)
-Text Primary:   #1A1A1A  (near-black)
-Text Secondary: #6B6B6B  (muted gray)
-Accent:         #E85D3A  (warm orange-red, for links and highlights)
-Accent Alt:     #3A7CE8  (cool blue, for secondary actions)
-Tag Background: #F0EDE6  (warm beige for tag pills)
-Success:        #2D8A4E  (green for positive states)
-Code Background:#F5F2EB  (warm light beige for code blocks)
+Background:     #fefcf8  (warm cream)
+Surface:        #f4f0e8  (parchment, for cards/surfaces)
+Border:         #e2dbd0  (soft warm border)
+Border Dark:    #cec6b8  (slightly stronger border)
+Text Primary:   #302b26  (warm dark brown)
+Text Secondary: #5a5550  (medium warm gray)
+Text Dim:       #908880  (muted text)
+Accent:         #c04830  (brick red, for links and highlights)
+Accent Alt:     #a33c28  (darker brick red, hover state)
+Tag Background: #f4f0e8  (same as surface)
+Success:        #287848  (green for positive states)
+Code Background:#eae5db  (warm light beige for code blocks)
 ```
 
 ### Dark Variant
@@ -47,9 +49,9 @@ Code Background:#2A2725
 ## Typography
 
 ```
-Headings:    "JetBrains Mono", "IBM Plex Mono", monospace
-Body:        "Inter", "IBM Plex Sans", system-ui, sans-serif
-Code:        "JetBrains Mono", "Fira Code", monospace
+Headings:    system-ui, -apple-system, 'Segoe UI', sans-serif
+Body:        system-ui, -apple-system, 'Segoe UI', sans-serif
+Code:        'Courier Prime', 'Courier New', monospace
 
 Scale:
   xs:    0.75rem   (12px)
@@ -202,57 +204,46 @@ export const cyberpunkTheme: ThemeTokens = {
 
 ## Component Design Patterns
 
-### Post Card (Retro Style)
+### Post Card
 
 ```
-┌──────────────────────────────────────────┐
-│ ● author · 2 hours ago                  │
-├──────────────────────────────────────────┤
-│                                          │
-│  Post Title in Monospace                 │
-│                                          │
-│  Body text in a clean readable sans-     │
-│  serif font with generous line height    │
-│  and comfortable measure width...        │
-│                                          │
-│  [tag-one] [tag-two] [tag-three]         │
-│                                          │
-├──────────────────────────────────────────┤
-│  ♡ 12    ↩ 3 comments    ⊕ share        │
-└──────────────────────────────────────────┘
+April 10, 2026            ← date in text-dim
+Post Title                ← font-semibold, hover → accent color
+Excerpt text showing...   ← text-secondary, 180 char truncation
+
+[tag-one] [tag-two]       ← colorful hash-based pill tags
 ```
 
-- **2px solid borders** (not shadows)
-- **0px border-radius** (sharp corners)
-- Tags as bordered pills with muted backgrounds
-- Interaction bar at the bottom with clear icon + text
+- **1px border-top** separator between cards (no box borders)
+- **6px border-radius** on pill tags
+- Tags use deterministic hash-based colors from 8-color palette
+
+### Tag Color System
+
+Tags use `getTagColor(tag)` from `utils/tagColor.ts` — a hash function maps each tag string to one of 8 color pairs (bg + text). This makes tag colors consistent across all pages.
 
 ### Page Layout
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│  neo                                    [blog] [about]  │
-│  ─────────────────────────────────────────────────────  │
-├───────────────────────────────────┬─────────────────────┤
-│                                   │                     │
-│  Main content area                │  Sidebar            │
-│  (post list / single post)        │  - Tags cloud       │
-│                                   │  - Recent posts     │
-│                                   │  - Comment section   │
-│                                   │    (on post view)   │
-│                                   │                     │
-├───────────────────────────────────┴─────────────────────┤
-│  footer · built with care · 2026                        │
-└─────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────┐
+│  allieg.dev    home blog widgets about recs │
+│  ────────────────────────────────────────  │
+│                                            │
+│         Main content (max 700px)           │
+│         hero / post list / page content    │
+│                                            │
+│  ──────────────────────────────────────── │
+│  allieg.dev © 2026 — made with too much    │
+│  coffee                                    │
+└────────────────────────────────────────────┘
 ```
+
+Single-column layout. No sidebar. Comments appear below post content.
 
 ## Responsive Strategy
 
-- **Desktop (>1024px)**: Two-column layout (content + sidebar)
-- **Tablet (768-1024px)**: Single column, sidebar below content
-- **Mobile (<768px)**: Full-width cards, collapsible sidebar
-
-Mobile-first Tailwind classes: default styles target mobile, `md:` and `lg:` prefixes add complexity.
+- Single-column at all breakpoints (max-width 700px, centered)
+- Mobile: same layout with `px-6` padding
 
 ## Accessibility
 

@@ -1,11 +1,9 @@
-export function Footer() {
-  const year = new Date().getFullYear();
+import { site } from "../../config";
 
+export function Footer() {
   return (
-    <footer className="border-t-2 border-border mt-12">
-      <div className="max-w-6xl mx-auto px-4 py-6 text-center text-text-secondary text-sm font-body">
-        <p>neo &middot; built with care &middot; {year}</p>
-      </div>
+    <footer className="max-w-[700px] mx-auto px-6 py-8 text-center text-text-secondary text-sm border-t border-border">
+      {site.footer}
     </footer>
   );
 }

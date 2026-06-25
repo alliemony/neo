@@ -5,7 +5,7 @@ import { Footer } from './Footer';
 describe('Footer', () => {
   it('renders the site name', () => {
     render(<Footer />);
-    expect(screen.getByText(/neo/)).toBeInTheDocument();
+    expect(screen.getByText(/allieg\.dev/)).toBeInTheDocument();
   });
 
   it('renders the current year', () => {

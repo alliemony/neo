@@ -40,12 +40,9 @@ describe("ThemeProvider", () => {
       </ThemeProvider>,
     );
     const root = document.documentElement;
-    expect(root.style.getPropertyValue("--color-bg")).toBe("#FAFAF8");
-    expect(root.style.getPropertyValue("--color-accent")).toBe("#E85D3A");
-    expect(root.style.getPropertyValue("--font-heading")).toBe(
-      '"JetBrains Mono", monospace',
-    );
-    expect(root.style.getPropertyValue("--border-width")).toBe("2px");
+    expect(root.style.getPropertyValue("--color-bg")).toBe("#fefcf8");
+    expect(root.style.getPropertyValue("--color-accent")).toBe("#c04830");
+    expect(root.style.getPropertyValue("--border-width")).toBe("1px");
   });
 
   it("updates CSS variables when theme changes", async () => {
