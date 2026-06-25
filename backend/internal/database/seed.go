@@ -7,7 +7,12 @@ import (
 )
 
 // Seed inserts sample posts, pages, and comments if the database is empty.
+// Recs are seeded independently so they populate even when posts already exist.
 func Seed(db *sql.DB) error {
+	if err := seedRecs(db); err != nil {
+		return err
+	}
+
 	var count int
 	if err := db.QueryRow("SELECT COUNT(*) FROM posts").Scan(&count); err != nil {
 		return err
@@ -274,6 +279,52 @@ I'm always happy to chat about programming, design, or interesting projects. Fee
 	db.Exec("UPDATE posts SET like_count = 8 WHERE slug = 'building-with-go-and-react'")
 	db.Exec("UPDATE posts SET like_count = 15 WHERE slug = 'retro-web-design'")
 	db.Exec("UPDATE posts SET like_count = 5 WHERE slug = 'python-ml-widgets'")
+
+	return nil
+}
+
+func seedRecs(db *sql.DB) error {
+	var count int
+	if err := db.QueryRow("SELECT COUNT(*) FROM recs").Scan(&count); err != nil {
+		return err
+	}
+	if count > 0 {
+		return nil
+	}
+
+	recs := []struct {
+		name, href, section, tag, tagBg, tagColor, description string
+	}{
+		{"Ollama", "https://ollama.ai", "Tools", "CLI", "#edf5f3", "#1a7060", "Run LLMs locally with one command. Changed my daily workflow completely. Fast, private, free."},
+		{"Zed", "https://zed.dev", "Tools", "Editor", "#eaeff8", "#2e58a0", "Fast, minimal editor. Feels like what a text editor should be in 2026. Collaborative built-in."},
+		{"LangGraph", "https://langchain-ai.github.io/langgraph/", "Tools", "ML", "#f0eaf5", "#6a3da0", "The least bad way to build agentic workflows. Explicit state machines beat implicit magic chains."},
+		{"Kagi", "https://kagi.com", "Tools", "Search", "#f5f0e8", "#a06020", "Paid search that's actually good. No ads, good results, bangs still work. Worth every cent."},
+		{"Fly.io", "https://fly.io", "Tools", "Infra", "#eaf3ed", "#257045", "Deploy containers globally, sensible pricing, great DX. My go-to for anything that needs to run 24/7."},
+		{"Obsidian", "https://obsidian.md", "Tools", "Notes", "#f0eaf5", "#6a3da0", "Local markdown notes with a graph view. I don't use the graph view. The local part is the point."},
+		{"Attention Is All You Need", "https://arxiv.org/abs/1706.03762", "Reading", "Paper", "#eaeff8", "#2e58a0", "Obviously. Read it if you haven't. Then read it again a year later — you'll get more the second time."},
+		{"A Memory Called Empire", "", "Reading", "Book", "#f5eaef", "#a82d5e", "Arkady Martine. A diplomat navigating imperial politics with a dead ambassador in her head. Genuinely brilliant."},
+		{"Lilian Weng's Blog", "https://lilianweng.github.io", "Reading", "Blog", "#edf5f3", "#1a7060", "The best ML explainers on the internet. Dense, accurate, deep. Bookmark it and read slowly."},
+		{"RAG Survey (Gao et al.)", "https://arxiv.org/abs/2312.10997", "Reading", "Paper", "#eaeff8", "#2e58a0", "Comprehensive survey of retrieval-augmented generation approaches. Good map of the space before diving in."},
+		{"Berkeley Mono", "https://berkeleygraphics.com/typefaces/berkeley-mono/", "Misc", "Font", "#f5f0e8", "#a06020", "Best monospace font I've used. Worth paying for if you stare at code all day."},
+		{"Practical AI", "https://changelog.com/practicalai", "Misc", "Podcast", "#eaf3ed", "#257045", "Stays grounded. Doesn't hype. Actual practitioners talking about actual implementations. Rare."},
+		{"Recurse Center", "https://recurse.com", "Misc", "Community", "#ecebf5", "#4038a0", "Three months of self-directed programming retreat. The best learning environment I've been in."},
+	}
+
+	for i, rec := range recs {
+		var href interface{}
+		if rec.href != "" {
+			href = rec.href
+		}
+		now := time.Now()
+		_, err := db.Exec(
+			`INSERT INTO recs (name, href, section, tag, tag_bg, tag_color, description, published, sort_order, created_at, updated_at)
+			 VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?)`,
+			rec.name, href, rec.section, rec.tag, rec.tagBg, rec.tagColor, rec.description, i, now, now,
+		)
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
 }

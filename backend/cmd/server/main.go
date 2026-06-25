@@ -53,10 +53,14 @@ func newRouter(cfg config.Config, db *sql.DB) http.Handler {
 	postRepo := repository.NewPostRepo(db)
 	commentRepo := repository.NewCommentRepo(db)
 	pageRepo := repository.NewPageRepo(db)
+	recsRepo := repository.NewRecsRepo(db)
+	musicRepo := repository.NewMusicRepo(db)
 
 	postService := service.NewPostService(postRepo)
 	commentService := service.NewCommentService(commentRepo, postRepo)
 	pageService := service.NewPageService(pageRepo)
+	recsService := service.NewRecsService(recsRepo)
+	musicService := service.NewMusicService(musicRepo)
 
 	r := chi.NewRouter()
 
@@ -77,6 +81,10 @@ func newRouter(cfg config.Config, db *sql.DB) http.Handler {
 	pageHandler := handler.NewPageHandler(pageService)
 	adminPostHandler := handler.NewAdminPostHandler(postService)
 	adminPageHandler := handler.NewAdminPageHandler(pageService)
+	recsHandler := handler.NewRecsHandler(recsService)
+	adminRecsHandler := handler.NewAdminRecsHandler(recsService)
+	musicHandler := handler.NewMusicHandler(musicService)
+	adminMusicHandler := handler.NewAdminMusicHandler(musicService)
 
 	commentRateLimiter := middleware.RateLimiter(30 * time.Second)
 
@@ -141,6 +149,12 @@ func newRouter(cfg config.Config, db *sql.DB) http.Handler {
 		r.Get("/pages", pageHandler.ListPublished)
 		r.Get("/pages/{slug}", pageHandler.GetBySlug)
 
+		// Public recs route
+		r.Get("/recs", recsHandler.ListPublic)
+
+		// Public music route
+		r.Get("/music", musicHandler.ListPublic)
+
 		// Admin routes (protected by selected auth middleware)
 		r.Route("/admin", func(r chi.Router) {
 			r.Use(adminAuthMiddleware)
@@ -154,6 +168,16 @@ func newRouter(cfg config.Config, db *sql.DB) http.Handler {
 			r.Post("/pages", adminPageHandler.Create)
 			r.Put("/pages/{slug}", adminPageHandler.Update)
 			r.Delete("/pages/{slug}", adminPageHandler.Delete)
+
+			r.Get("/recs", adminRecsHandler.ListAll)
+			r.Post("/recs", adminRecsHandler.Create)
+			r.Put("/recs/{id}", adminRecsHandler.Update)
+			r.Delete("/recs/{id}", adminRecsHandler.Delete)
+
+			r.Get("/music", adminMusicHandler.ListAll)
+			r.Post("/music", adminMusicHandler.Create)
+			r.Put("/music/{id}", adminMusicHandler.Update)
+			r.Delete("/music/{id}", adminMusicHandler.Delete)
 		})
 	})
 

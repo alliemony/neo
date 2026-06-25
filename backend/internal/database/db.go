@@ -160,6 +160,41 @@ var sqliteMigrations = map[string]string{
 	"005_add_content_type_to_pages": `
 		ALTER TABLE pages ADD COLUMN content_type TEXT NOT NULL DEFAULT 'markdown';
 	`,
+	"006_create_recs": `
+		CREATE TABLE IF NOT EXISTS recs (
+			id          INTEGER PRIMARY KEY AUTOINCREMENT,
+			name        TEXT NOT NULL,
+			href        TEXT,
+			section     TEXT NOT NULL,
+			tag         TEXT NOT NULL,
+			tag_bg      TEXT NOT NULL,
+			tag_color   TEXT NOT NULL,
+			description TEXT NOT NULL,
+			published   INTEGER NOT NULL DEFAULT 0,
+			sort_order  INTEGER NOT NULL DEFAULT 0,
+			created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+		);
+		CREATE INDEX IF NOT EXISTS idx_recs_published ON recs(published);
+		CREATE INDEX IF NOT EXISTS idx_recs_section ON recs(section);
+	`,
+	"007_create_music_recs": `
+		CREATE TABLE IF NOT EXISTS music_recs (
+			id          INTEGER PRIMARY KEY AUTOINCREMENT,
+			title       TEXT NOT NULL,
+			artist      TEXT NOT NULL,
+			album       TEXT,
+			cover_url   TEXT,
+			spotify_url TEXT,
+			apple_url   TEXT,
+			note        TEXT,
+			published   INTEGER NOT NULL DEFAULT 0,
+			sort_order  INTEGER NOT NULL DEFAULT 0,
+			created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+		);
+		CREATE INDEX IF NOT EXISTS idx_music_recs_published ON music_recs(published);
+	`,
 }
 
 // postgresMigrations are PostgreSQL-specific DDL.
@@ -207,5 +242,40 @@ var postgresMigrations = map[string]string{
 	`,
 	"005_add_content_type_to_pages": `
 		ALTER TABLE pages ADD COLUMN content_type TEXT NOT NULL DEFAULT 'markdown';
+	`,
+	"006_create_recs": `
+		CREATE TABLE IF NOT EXISTS recs (
+			id          SERIAL PRIMARY KEY,
+			name        TEXT NOT NULL,
+			href        TEXT,
+			section     TEXT NOT NULL,
+			tag         TEXT NOT NULL,
+			tag_bg      TEXT NOT NULL,
+			tag_color   TEXT NOT NULL,
+			description TEXT NOT NULL,
+			published   BOOLEAN NOT NULL DEFAULT FALSE,
+			sort_order  INTEGER NOT NULL DEFAULT 0,
+			created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+		);
+		CREATE INDEX IF NOT EXISTS idx_recs_published ON recs(published);
+		CREATE INDEX IF NOT EXISTS idx_recs_section ON recs(section);
+	`,
+	"007_create_music_recs": `
+		CREATE TABLE IF NOT EXISTS music_recs (
+			id          SERIAL PRIMARY KEY,
+			title       TEXT NOT NULL,
+			artist      TEXT NOT NULL,
+			album       TEXT,
+			cover_url   TEXT,
+			spotify_url TEXT,
+			apple_url   TEXT,
+			note        TEXT,
+			published   BOOLEAN NOT NULL DEFAULT FALSE,
+			sort_order  INTEGER NOT NULL DEFAULT 0,
+			created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+		);
+		CREATE INDEX IF NOT EXISTS idx_music_recs_published ON music_recs(published);
 	`,
 }

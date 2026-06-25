@@ -73,7 +73,8 @@ neo/
 │   │   │   ├── Blog.tsx       # /blog — post list with search/filter
 │   │   │   ├── PostView.tsx   # /blog/:slug — single post
 │   │   │   ├── About.tsx      # /about — about page (static)
-│   │   │   ├── Recs.tsx       # /recs — recommendations (static)
+│   │   │   ├── Recs.tsx       # /recs — recommendations (DB-backed, grouped by section)
+│   │   │   ├── Music.tsx      # /music — music recs with streaming pills and lyrics
 │   │   │   ├── Widgets.tsx    # /widgets — widget gallery
 │   │   │   ├── TagFeed.tsx    # /tag/:tag — tag filtered posts
 │   │   │   └── admin/         # /admin/* — admin routes
@@ -191,6 +192,8 @@ GET    /api/v1/posts/:slug        # Get single post
 GET    /api/v1/posts/:slug/comments  # List comments for a post
 POST   /api/v1/posts/:slug/comments  # Add a comment (rate-limited)
 GET    /api/v1/tags               # List all tags
+GET    /api/v1/recs               # List published recs grouped by section
+GET    /api/v1/music              # List published music recs
 ```
 
 ### Admin Endpoints (authenticated)
@@ -203,6 +206,14 @@ GET    /api/v1/admin/pages        # List pages
 POST   /api/v1/admin/pages        # Create page
 PUT    /api/v1/admin/pages/:slug  # Update page
 DELETE /api/v1/admin/pages/:slug  # Delete page
+GET    /api/v1/admin/recs         # List all recs (including drafts)
+POST   /api/v1/admin/recs         # Create rec
+PUT    /api/v1/admin/recs/:id     # Update rec
+DELETE /api/v1/admin/recs/:id     # Delete rec
+GET    /api/v1/admin/music        # List all music recs (including drafts)
+POST   /api/v1/admin/music        # Create music rec
+PUT    /api/v1/admin/music/:id    # Update music rec
+DELETE /api/v1/admin/music/:id    # Delete music rec
 ```
 
 ### Health

@@ -6,6 +6,7 @@ import { Blog } from "./routes/Blog";
 import { PostView } from "./routes/PostView";
 import { About } from "./routes/About";
 import { Recs } from "./routes/Recs";
+import { Music } from "./routes/Music";
 import { Widgets } from "./routes/Widgets";
 import { PageView } from "./routes/PageView";
 import { AdminLogin } from "./routes/AdminLogin";
@@ -36,6 +37,7 @@ function App() {
           <Route path="/blog/:slug" element={<PostView />} />
           <Route path="/about" element={<About />} />
           <Route path="/recs" element={<Recs />} />
+          <Route path="/music" element={<Music />} />
           <Route path="/widgets" element={<Widgets />} />
           <Route path="/widgets/:id" element={<Widgets />} />
           <Route path="/page/:slug" element={<PageView />} />
