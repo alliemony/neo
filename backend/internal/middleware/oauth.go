@@ -2,7 +2,9 @@ package middleware
 
 import (
 	"context"
+	"crypto/hmac"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -201,13 +203,33 @@ func FetchGitHubUser(accessToken string, userEndpoint string) (*GitHubUser, erro
 	return &user, nil
 }
 
-// GenerateState creates a random state string for CSRF protection.
-func GenerateState() (string, error) {
-	b := make([]byte, 16)
-	if _, err := rand.Read(b); err != nil {
+// GenerateSignedState creates a HMAC-signed state string for CSRF protection.
+// The state is self-verifiable using the server secret — no cookie or server-side
+// storage needed. This avoids SameSite cookie issues in OAuth redirect flows.
+func GenerateSignedState(secret []byte) (string, error) {
+	nonce := make([]byte, 16)
+	if _, err := rand.Read(nonce); err != nil {
 		return "", err
 	}
-	return hex.EncodeToString(b), nil
+	nonceHex := hex.EncodeToString(nonce)
+	return nonceHex + "." + signState(nonceHex, secret), nil
+}
+
+// VerifySignedState checks that a state string was produced by GenerateSignedState
+// with the same secret.
+func VerifySignedState(state string, secret []byte) bool {
+	parts := strings.SplitN(state, ".", 2)
+	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+		return false
+	}
+	expected := signState(parts[0], secret)
+	return hmac.Equal([]byte(parts[1]), []byte(expected))
+}
+
+func signState(nonce string, secret []byte) string {
+	mac := hmac.New(sha256.New, secret)
+	mac.Write([]byte(nonce))
+	return hex.EncodeToString(mac.Sum(nil))
 }
 
 // IsUserAllowed checks if a username is in the allowed users list.

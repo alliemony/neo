@@ -35,22 +35,13 @@ func NewAuthHandler(oauth *middleware.OAuthAuthenticator) *AuthHandler {
 
 // Login redirects the user to GitHub's OAuth authorization page.
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
-	state, err := middleware.GenerateState()
+	// State is HMAC-signed so it can be verified on callback without a cookie.
+	// This avoids SameSite cookie issues when GitHub redirects back.
+	state, err := middleware.GenerateSignedState(h.oauth.Config.SessionSecret)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "failed to generate state")
 		return
 	}
-
-	// Store state in a short-lived cookie for CSRF protection
-	http.SetCookie(w, &http.Cookie{
-		Name:     "oauth_state",
-		Value:    state,
-		Path:     "/",
-		MaxAge:   600, // 10 minutes
-		HttpOnly: true,
-		SameSite: http.SameSiteLaxMode,
-		Secure:   h.oauth.Config.Secure,
-	})
 
 	url := fmt.Sprintf("%s?client_id=%s&redirect_uri=%s&scope=read:user&state=%s",
 		githubAuthorizeURL,
@@ -64,26 +55,12 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 // Callback handles the OAuth callback from GitHub.
 func (h *AuthHandler) Callback(w http.ResponseWriter, r *http.Request) {
-	// 1. Verify state parameter
-	stateCookie, err := r.Cookie("oauth_state")
-	if err != nil || stateCookie.Value == "" {
-		writeError(w, http.StatusForbidden, "missing state cookie")
-		return
-	}
-
+	// 1. Verify state parameter via HMAC signature (no cookie needed)
 	queryState := r.URL.Query().Get("state")
-	if queryState != stateCookie.Value {
+	if !middleware.VerifySignedState(queryState, h.oauth.Config.SessionSecret) {
 		writeError(w, http.StatusForbidden, "invalid state parameter")
 		return
 	}
-
-	// Clear the state cookie
-	http.SetCookie(w, &http.Cookie{
-		Name:   "oauth_state",
-		Value:  "",
-		Path:   "/",
-		MaxAge: -1,
-	})
 
 	// 2. Exchange code for access token
 	code := r.URL.Query().Get("code")
