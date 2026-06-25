@@ -31,7 +31,8 @@ func setupAuthHandler(t *testing.T, secret []byte) *AuthHandler {
 }
 
 func TestAuthHandler_Login_RedirectsToGitHub(t *testing.T) {
-	h := setupAuthHandler(t, []byte("test-secret-key-32-bytes-long!!!"))
+	secret := []byte("test-secret-key-32-bytes-long!!!")
+	h := setupAuthHandler(t, secret)
 
 	r := chi.NewRouter()
 	r.Get("/api/v1/auth/login", h.Login)
@@ -63,69 +64,50 @@ func TestAuthHandler_Login_RedirectsToGitHub(t *testing.T) {
 		t.Errorf("location = %q, should contain state", location)
 	}
 
-	// Should set oauth_state cookie
-	cookies := w.Result().Cookies()
-	var stateCookie *http.Cookie
-	for _, c := range cookies {
+	// No oauth_state cookie should be set — state is HMAC-signed in the URL
+	for _, c := range w.Result().Cookies() {
 		if c.Name == "oauth_state" {
-			stateCookie = c
-			break
+			t.Error("oauth_state cookie should not be set (stateless HMAC flow)")
 		}
 	}
-	if stateCookie == nil {
-		t.Fatal("oauth_state cookie not set")
-	}
-	if !stateCookie.HttpOnly {
-		t.Error("oauth_state cookie should be HttpOnly")
-	}
 }
 
-func TestAuthHandler_Callback_StateMismatch(t *testing.T) {
+func TestAuthHandler_Callback_InvalidState(t *testing.T) {
 	h := setupAuthHandler(t, []byte("test-secret-key-32-bytes-long!!!"))
 
 	r := chi.NewRouter()
 	r.Get("/api/v1/auth/callback", h.Callback)
 
-	req := httptest.NewRequest("GET", "/api/v1/auth/callback?code=abc&state=wrong", nil)
-	req.AddCookie(&http.Cookie{Name: "oauth_state", Value: "correct"})
-	w := httptest.NewRecorder()
-	r.ServeHTTP(w, req)
+	for _, state := range []string{"wrong", "", "nodot", "nonce.badsig"} {
+		req := httptest.NewRequest("GET", "/api/v1/auth/callback?code=abc&state="+state, nil)
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req)
 
-	if w.Code != http.StatusForbidden {
-		t.Errorf("status = %d, want %d", w.Code, http.StatusForbidden)
-	}
+		if w.Code != http.StatusForbidden {
+			t.Errorf("state=%q: status = %d, want %d", state, w.Code, http.StatusForbidden)
+		}
 
-	var resp map[string]string
-	json.NewDecoder(w.Body).Decode(&resp)
-	if resp["error"] != "invalid state parameter" {
-		t.Errorf("error = %q, want 'invalid state parameter'", resp["error"])
-	}
-}
-
-func TestAuthHandler_Callback_MissingState(t *testing.T) {
-	h := setupAuthHandler(t, []byte("test-secret-key-32-bytes-long!!!"))
-
-	r := chi.NewRouter()
-	r.Get("/api/v1/auth/callback", h.Callback)
-
-	req := httptest.NewRequest("GET", "/api/v1/auth/callback?code=abc&state=xyz", nil)
-	// No state cookie
-	w := httptest.NewRecorder()
-	r.ServeHTTP(w, req)
-
-	if w.Code != http.StatusForbidden {
-		t.Errorf("status = %d, want %d", w.Code, http.StatusForbidden)
+		var resp map[string]string
+		json.NewDecoder(w.Body).Decode(&resp)
+		if resp["error"] != "invalid state parameter" {
+			t.Errorf("state=%q: error = %q, want 'invalid state parameter'", state, resp["error"])
+		}
 	}
 }
 
 func TestAuthHandler_Callback_MissingCode(t *testing.T) {
-	h := setupAuthHandler(t, []byte("test-secret-key-32-bytes-long!!!"))
+	secret := []byte("test-secret-key-32-bytes-long!!!")
+	h := setupAuthHandler(t, secret)
+
+	state, err := middleware.GenerateSignedState(secret)
+	if err != nil {
+		t.Fatalf("GenerateSignedState: %v", err)
+	}
 
 	r := chi.NewRouter()
 	r.Get("/api/v1/auth/callback", h.Callback)
 
-	req := httptest.NewRequest("GET", "/api/v1/auth/callback?state=xyz", nil)
-	req.AddCookie(&http.Cookie{Name: "oauth_state", Value: "xyz"})
+	req := httptest.NewRequest("GET", "/api/v1/auth/callback?state="+state, nil)
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
@@ -137,7 +119,6 @@ func TestAuthHandler_Callback_MissingCode(t *testing.T) {
 func TestAuthHandler_Callback_UserNotAllowed(t *testing.T) {
 	secret := []byte("test-secret-key-32-bytes-long!!!")
 
-	// Set up mock GitHub servers
 	tokenServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(middleware.GitHubTokenResponse{AccessToken: "mock-token"})
@@ -154,11 +135,15 @@ func TestAuthHandler_Callback_UserNotAllowed(t *testing.T) {
 	h.tokenEndpoint = tokenServer.URL
 	h.userEndpoint = userServer.URL
 
+	state, err := middleware.GenerateSignedState(secret)
+	if err != nil {
+		t.Fatalf("GenerateSignedState: %v", err)
+	}
+
 	r := chi.NewRouter()
 	r.Get("/api/v1/auth/callback", h.Callback)
 
-	req := httptest.NewRequest("GET", "/api/v1/auth/callback?code=valid&state=xyz", nil)
-	req.AddCookie(&http.Cookie{Name: "oauth_state", Value: "xyz"})
+	req := httptest.NewRequest("GET", "/api/v1/auth/callback?code=valid&state="+state, nil)
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
@@ -195,11 +180,15 @@ func TestAuthHandler_Callback_Success(t *testing.T) {
 	h.tokenEndpoint = tokenServer.URL
 	h.userEndpoint = userServer.URL
 
+	state, err := middleware.GenerateSignedState(secret)
+	if err != nil {
+		t.Fatalf("GenerateSignedState: %v", err)
+	}
+
 	r := chi.NewRouter()
 	r.Get("/api/v1/auth/callback", h.Callback)
 
-	req := httptest.NewRequest("GET", "/api/v1/auth/callback?code=valid-code&state=xyz", nil)
-	req.AddCookie(&http.Cookie{Name: "oauth_state", Value: "xyz"})
+	req := httptest.NewRequest("GET", "/api/v1/auth/callback?code=valid-code&state="+state, nil)
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 

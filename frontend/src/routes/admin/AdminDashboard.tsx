@@ -71,7 +71,7 @@ export function AdminDashboard() {
         <section>
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-heading text-xl font-bold">Posts</h2>
-            <Link to="/admin/posts/new" className="bg-accent text-white px-3 py-1 text-sm font-bold">
+            <Link to="/admin/posts/new" className="bg-accent text-white! px-3 py-1 text-sm font-bold">
               New Post
             </Link>
           </div>
@@ -95,7 +95,7 @@ export function AdminDashboard() {
                     </span>
                   </div>
                   <div className="flex gap-2">
-                    <Link to={`/admin/posts/${post.slug}`} className="text-accent text-sm hover:underline">
+                    <Link to={`/admin/posts/${post.slug}/edit`} className="text-accent text-sm hover:underline">
                       Edit
                     </Link>
                     <button
@@ -114,7 +114,7 @@ export function AdminDashboard() {
         <section>
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-heading text-xl font-bold">Pages</h2>
-            <Link to="/admin/pages/new" className="bg-accent text-white px-3 py-1 text-sm font-bold">
+            <Link to="/admin/pages/new" className="bg-accent text-white! px-3 py-1 text-sm font-bold">
               New Page
             </Link>
           </div>
@@ -138,7 +138,7 @@ export function AdminDashboard() {
                     </span>
                   </div>
                   <div className="flex gap-2">
-                    <Link to={`/admin/pages/${page.slug}`} className="text-accent text-sm hover:underline">
+                    <Link to={`/admin/pages/${page.slug}/edit`} className="text-accent text-sm hover:underline">
                       Edit
                     </Link>
                     <button

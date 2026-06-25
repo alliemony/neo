@@ -16,6 +16,7 @@ primary_region = 'sin'
   AUTH_MODE = "oauth"
   DATABASE_URL = "sqlite:///data/neo.db"
   CORS_ORIGINS="https://neo-*.fly.dev/"
+  BASE_URL = "https://neo-weuu9q.fly.dev"
 
 [http_service]
   internal_port = 8080

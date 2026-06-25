@@ -172,17 +172,50 @@ func TestIsUserAllowed(t *testing.T) {
 	}
 }
 
-func TestGenerateState(t *testing.T) {
-	s1, err := GenerateState()
-	if err != nil {
-		t.Fatalf("GenerateState error: %v", err)
-	}
-	s2, _ := GenerateState()
+func TestGenerateSignedState(t *testing.T) {
+	secret := []byte("test-secret-key-32-bytes-long!!!")
 
-	if len(s1) != 32 {
-		t.Errorf("state length = %d, want 32 hex chars", len(s1))
+	s1, err := GenerateSignedState(secret)
+	if err != nil {
+		t.Fatalf("GenerateSignedState error: %v", err)
 	}
+	s2, _ := GenerateSignedState(secret)
+
 	if s1 == s2 {
 		t.Error("two generated states should be different")
+	}
+
+	// Each state should be verifiable
+	if !VerifySignedState(s1, secret) {
+		t.Error("s1 should verify with correct secret")
+	}
+	if !VerifySignedState(s2, secret) {
+		t.Error("s2 should verify with correct secret")
+	}
+}
+
+func TestVerifySignedState(t *testing.T) {
+	secret := []byte("test-secret-key-32-bytes-long!!!")
+	wrongSecret := []byte("wrong-secret-key-32-bytes!!!xxxx")
+
+	state, err := GenerateSignedState(secret)
+	if err != nil {
+		t.Fatalf("GenerateSignedState error: %v", err)
+	}
+
+	if !VerifySignedState(state, secret) {
+		t.Error("valid state should verify with correct secret")
+	}
+	if VerifySignedState(state, wrongSecret) {
+		t.Error("valid state should not verify with wrong secret")
+	}
+	if VerifySignedState("", secret) {
+		t.Error("empty state should not verify")
+	}
+	if VerifySignedState("nodot", secret) {
+		t.Error("state without dot should not verify")
+	}
+	if VerifySignedState("nonce.badsig", secret) {
+		t.Error("state with bad signature should not verify")
 	}
 }
